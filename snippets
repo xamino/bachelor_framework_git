@@ -8,20 +8,81 @@ public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Imgproc.cvtColor(out, out, Imgproc.COLOR_RGB2RGBA);
         return out;
     }
-/**
-Loads a bitmap from the resource folder and scales it to the correct output, then returns that.
-**/
-public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Mat in = new Mat(), out = new Mat(), middle = new Mat();
-        MatOfKeyPoint keyPoint = new MatOfKeyPoint();
+FeatureDetector detector;
+    DescriptorExtractor extractor;
+    DescriptorMatcher matcher;
+    MatOfDMatch matches;
+    Scalar kpColor;
+    MatOfKeyPoint keypoints, templatePoints;
+    Mat in, out, template, templateDescriptor, sceneDescriptor;
 
-        // Load image
-        Bitmap bMap= BitmapFactory.decodeResource(getResources(),
-                R.drawable.ic_launcher);
+    // On start, prepare things (instead of in the constructor?):
+    public void onCameraViewStarted(int width, int height) {
+        // Only needs to be done once:
+        detector = FeatureDetector.create(FeatureDetector.BRISK);
+        extractor = DescriptorExtractor.create(DescriptorExtractor.BRISK);
+        matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+        // Color for drawing keypoints
+        kpColor = new Scalar(255,159,10);
+        // Prepare working material (otherwise null pointers!):
+        keypoints = new MatOfKeyPoint();
+        templatePoints = new MatOfKeyPoint();
+        out = new Mat();
+        in = new Mat();
         template = new Mat();
+        templateDescriptor = new Mat();
+        sceneDescriptor = new Mat();
+        matches = new MatOfDMatch();
+        // Prepare marker:
+        Bitmap bMap= BitmapFactory.decodeResource(getResources(),
+                R.drawable.marker);
         Utils.bitmapToMat(bMap, template);
+        detector.detect(template, templatePoints);
+        extractor.compute(template, templatePoints, templateDescriptor);
+    }
 
-        Imgproc.resize(template, out, inputFrame.gray().size());
+    public void onCameraViewStopped() {
+    }
 
+    /**
+     * I think the magic happens here.
+     *
+     * @param inputFrame
+     * @return
+     */
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        // Feature detection only works with rgb, so we need to convert (and
+        // convert back when returning the finished picture)
+        Imgproc.cvtColor(inputFrame.rgba(), in, Imgproc.COLOR_RGBA2RGB);
+
+        // Detect features in camera picture
+        detector.detect(in, keypoints);
+        // Generate descriptor:
+        extractor.compute(in, keypoints, sceneDescriptor);
+        // Test:
+        if (sceneDescriptor.cols() != templateDescriptor.cols() ||
+                sceneDescriptor.type() != templateDescriptor.type()) {
+            Log.e(TAG, "First frame error thingy...");
+            return inputFrame.gray();
+        }
+        // Match:
+        matcher.match(templateDescriptor, sceneDescriptor, matches);
+        // If no matches, return
+        if (matches.toList().isEmpty()) {
+            Log.e(TAG, "Empty list, next...");
+            Features2d.drawKeypoints(in, keypoints, out, kpColor, 0);
+
+            Imgproc.cvtColor(out, out, Imgproc.COLOR_RGB2RGBA);
+            return out;
+        }
+        // Draw match
+        Features2d.drawMatches(template, templatePoints, in, keypoints,
+                matches, out, kpColor, new Scalar(-1), new MatOfByte(), 0);
+        // Scale output back to 1280x720:
+        Imgproc.resize(out, out, inputFrame.rgba().size(), 0,0,
+                Imgproc.INTER_AREA);
+
+        // Convert back:
+        Imgproc.cvtColor(out, out, Imgproc.COLOR_RGB2RGBA);
         return out;
     }
