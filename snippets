@@ -1,4 +1,37 @@
 /**
+Working Polymaker for squares (some optimizations still todo)
+**/
+public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        // TODO CANNY THRESHOLD VALUES
+        Imgproc.Canny(inputFrame.gray(), out, 50, 150);
+        // Otherwise leak!
+        contours.clear();
+
+        Imgproc.findContours(out.clone(), contours, new Mat(), Imgproc.RETR_TREE,
+                Imgproc.CHAIN_APPROX_NONE);
+
+        // Get all 4-vertice polygons from contours:
+        ArrayList<MatOfPoint> blub = new ArrayList<MatOfPoint>();
+        for (int i = 0; i < contours.size(); i++) {
+            MatOfPoint2f input = new MatOfPoint2f(contours.get(i).toArray());
+            MatOfPoint2f result = new MatOfPoint2f();
+            // Log.e(TAG, "Th: "+input.total() * 0.05);
+            Imgproc.approxPolyDP(input, result, input.total() * 0.04,
+                    true); // TODO THRESHOLD!
+            MatOfPoint result2 = new MatOfPoint(result.toArray());
+            // Only take contours with 4 points
+            // TODO CHECK ANGLES etc
+            if (result.total() == 4 && Imgproc.isContourConvex(result2)) {
+                blub.add(result2);
+            }
+        }
+        in = inputFrame.rgba();
+        Core.polylines(in, blub, true, new Scalar(255, 0, 0), 2);
+
+        return in;
+    }
+
+/**
 Working feature detection:
 **/
 public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
