@@ -1,28 +1,36 @@
 /**
 Working Polymaker for squares (some optimizations still todo)
 **/
-public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         // TODO CANNY THRESHOLD VALUES
-        Imgproc.Canny(inputFrame.gray(), out, 50, 150);
+        Imgproc.Canny(inputFrame.gray(), out, 150, 220);
+        /*
+        Note: adaptive needs large values for gauss to be good for movement
+        Mean: 5 & 15 good values
+        Gauss:
+        * */
+        // Imgproc.adaptiveThreshold(inputFrame.gray(), out, 255.0,
+        // Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 5,10);
         // Otherwise leak!
+
         contours.clear();
+        blub.clear();
 
-        Imgproc.findContours(out.clone(), contours, new Mat(), Imgproc.RETR_TREE,
+        Imgproc.findContours(out.clone(), contours, new Mat(), Imgproc.RETR_CCOMP,
                 Imgproc.CHAIN_APPROX_NONE);
-
         // Get all 4-vertice polygons from contours:
-        ArrayList<MatOfPoint> blub = new ArrayList<MatOfPoint>();
         for (int i = 0; i < contours.size(); i++) {
             MatOfPoint2f input = new MatOfPoint2f(contours.get(i).toArray());
-            MatOfPoint2f result = new MatOfPoint2f();
-            // Log.e(TAG, "Th: "+input.total() * 0.05);
+            // Check area:
+            if (128 > (int) input.size().area()) {
+                continue;
+            }
             Imgproc.approxPolyDP(input, result, input.total() * 0.04,
                     true); // TODO THRESHOLD!
-            MatOfPoint result2 = new MatOfPoint(result.toArray());
-            // Only take contours with 4 points
-            // TODO CHECK ANGLES etc
-            if (result.total() == 4 && Imgproc.isContourConvex(result2)) {
-                blub.add(result2);
+            // Only take contours with ==4 points
+            if (result.total() == 4 && Imgproc.isContourConvex(new
+                    MatOfPoint(result.toArray()))) {
+                blub.add(new MatOfPoint(result.toArray()));
             }
         }
         in = inputFrame.rgba();
