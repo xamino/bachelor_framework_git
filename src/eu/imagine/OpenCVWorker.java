@@ -81,19 +81,16 @@ public class OpenCVWorker extends Thread {
                     Mat perspective = Imgproc.getPerspectiveTransform
                             (result, vecOut);
                     sub.add(contours.get(i));
-                    Core.perspectiveTransform(in, outMarker, perspective);
+                    Imgproc.warpPerspective(in, outMarker, perspective,
+                            new Size(256,256));
                 }
             }
 
-            // Draw masked squares
-            Mat mask = new Mat(in.rows(), in.cols(), in.type());
-            Imgproc.drawContours(mask, sub, -1,
-                    new Scalar(255), -1);
-            Mat crop = new Mat(in.rows(), in.cols(), in.type());
-            crop.setTo(new Scalar(0));
-            in.copyTo(crop, mask);
+            Mat roi = in.submat(0,0,255,255);
+            outMarker.copyTo(roi);
+
             try {
-                MyActivity.resultFeeder.put(crop);
+                MyActivity.resultFeeder.put(in);
             } catch (InterruptedException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
