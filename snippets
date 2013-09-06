@@ -1,42 +1,96 @@
 /**
-Working Polymaker for squares (some optimizations still todo)
+To use with OpenCVWorker:
+**/
+
+public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame
+                                      inputFrame) {
+        try {
+            workerFeeder.put(inputFrame.gray().clone());
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Error feeding mat to queue!");
+            e.printStackTrace();
+        }
+        if (resultFeeder.remainingCapacity()==0) {
+            try {
+                return resultFeeder.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                return inputFrame.rgba();
+            }
+        } else
+            return inputFrame.rgba();
+    }
+
+/**
+Working almost everything (TODO: ID and pass transformation)
 **/
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        // TODO CANNY THRESHOLD VALUES
-        Imgproc.Canny(inputFrame.gray(), out, 150, 220);
-        /*
-        Note: adaptive needs large values for gauss to be good for movement
-        Mean: 5 & 15 good values
-        Gauss:
-        * */
-        // Imgproc.adaptiveThreshold(inputFrame.gray(), out, 255.0,
-        // Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 5,10);
-        // Otherwise leak!
+        if (USE_CANNY) {
+            Imgproc.Canny(inputFrame.gray(), out, 50, 150);
+        } else {
+            // Imgproc.threshold(inputFrame.gray(), out, 127, 255, Imgproc.THRESH_BINARY);
+            Imgproc.adaptiveThreshold(inputFrame.gray(), out, 255,
+                    Imgproc.ADAPTIVE_THRESH_MEAN_C,
+                    Imgproc.THRESH_BINARY_INV, 81, 10);
+        }
 
         contours.clear();
+        contoursAll.clear();
         blub.clear();
 
-        Imgproc.findContours(out.clone(), contours, new Mat(), Imgproc.RETR_CCOMP,
+        Imgproc.findContours(out.clone(), contoursAll, new Mat(),
+                Imgproc.RETR_LIST,
                 Imgproc.CHAIN_APPROX_NONE);
+        // Remove too small contours:
+        for (MatOfPoint contour : contoursAll) {
+            // TODO: Set good threshold (depends on marker size!)
+            if (contour.total() > 200)
+                contours.add(contour);
+        }
+
+        // DEBUG
+        if (DEBUG_CONTOURS) {
+            in = inputFrame.rgba();
+            Imgproc.drawContours(in, contours, -1, new Scalar(255, 0, 0), 2);
+            return in;
+        }
+
         // Get all 4-vertice polygons from contours:
         for (int i = 0; i < contours.size(); i++) {
             MatOfPoint2f input = new MatOfPoint2f(contours.get(i).toArray());
-            // Check area:
-            if (128 > (int) input.size().area()) {
+            Imgproc.approxPolyDP(input, result, input.total() * 0.05,
+                    true);
+            // Only take contours with ==4 points
+            if (result.total() != 4 || !Imgproc.isContourConvex(new
+                    MatOfPoint(result.toArray()))) {
                 continue;
             }
-            Imgproc.approxPolyDP(input, result, input.total() * 0.04,
-                    true); // TODO THRESHOLD!
-            // Only take contours with ==4 points
-            if (result.total() == 4 && Imgproc.isContourConvex(new
-                    MatOfPoint(result.toArray()))) {
-                blub.add(new MatOfPoint(result.toArray()));
-            }
+            blub.add(new MatOfPoint(result.toArray()));
         }
-        in = inputFrame.rgba();
-        Core.polylines(in, blub, true, new Scalar(255, 0, 0), 2);
 
-        return in;
+        if (DEBUG_POLY) {
+            in = inputFrame.rgba();
+            Core.polylines(in, blub, true, new Scalar(255, 0, 0), 2);
+            return in;
+        }
+
+        // DEBUG: Draw single unwarped marker
+        if (!blub.isEmpty()) {
+            MatOfPoint2f work = new MatOfPoint2f(blub.get(0).toArray());
+            Mat perspective = Imgproc.getPerspectiveTransform(work, standardMarker);
+            Imgproc.warpPerspective(inputFrame.rgba(), out, perspective,
+                    new Size(256, 256));
+
+            // TODO Slow, needs to be done quicker!
+            Mat returnThingy = inputFrame.rgba();
+            for (int i=0; i<256; i++)
+                for (int j=0; j<256; j++)
+                    returnThingy.put(i,j,out.get(i,j));
+
+            return returnThingy;
+        }
+
+        return inputFrame.rgba();
     }
 
 /**
