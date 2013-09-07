@@ -63,6 +63,8 @@ public class OpenCVWorker extends Thread {
 
             Imgproc.findContours(out.clone(), contours, new Mat(), Imgproc.RETR_CCOMP,
                     Imgproc.CHAIN_APPROX_NONE);
+
+            Boolean hack = false;
             // Get all 4-vertice polygons from contours:
             for (int i = 0; i < contours.size(); i++) {
                 MatOfPoint2f input = new MatOfPoint2f(contours.get(i).toArray());
@@ -82,17 +84,20 @@ public class OpenCVWorker extends Thread {
                             (result, vecOut);
                     sub.add(contours.get(i));
                     Imgproc.warpPerspective(in, outMarker, perspective,
-                            new Size(256,256));
+                            new Size(256, 256));
+                    hack = true;
                 }
             }
 
-            Mat roi = in.submat(0,0,255,255);
-            outMarker.copyTo(roi);
+            if (hack) {
+                Mat roi = in.submat(0,0,255,255);
+                outMarker.copyTo(in, roi);
 
-            try {
-                MyActivity.resultFeeder.put(in);
-            } catch (InterruptedException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                try {
+                    MyActivity.resultFeeder.put(in);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
             }
 
             Log.v(TAG, "[DONE] Finished task in " + (System.currentTimeMillis()
