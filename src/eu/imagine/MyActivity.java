@@ -25,7 +25,7 @@ public class MyActivity extends Activity implements CameraBridgeViewBase.CvCamer
     private boolean USE_CANNY = false;
     private boolean DEBUG_PREP_FRAME = false;
     private boolean DEBUG_CONTOURS = false;
-    private boolean DEBUG_POLY = false;
+    private boolean DEBUG_POLY = true;
     private boolean DEBUG_DRAW_FIRST_MARKER = true;
     private boolean DEBUG_DRAW_SAMPLING = true;
     private boolean DEBUG_DRAW_MARKER_NOTIFIER = false;
@@ -44,6 +44,8 @@ public class MyActivity extends Activity implements CameraBridgeViewBase.CvCamer
     // Colors
     private final double[] GREEN = new double[]{0, 255, 0, 0};
     private final double[] RED = new double[]{255, 0, 0, 0};
+    private final double[] WHITE = new double[]{255, 255, 255, 0};
+    private final double[] BLACK = new double[]{0, 0, 0, 0};
 
     Mat out, compositeFrameOut, tempPerspective;
     ArrayList<MatOfPoint> contours, contoursAll;
@@ -111,10 +113,9 @@ public class MyActivity extends Activity implements CameraBridgeViewBase.CvCamer
         result = new MatOfPoint2f();
         // Prepare standard marker:
         standardMarker = new MatOfPoint2f();
-        standardMarker.fromArray(new Point(MARKER_SIZE, MARKER_SIZE),
-                new Point(0, MARKER_SIZE),
+        standardMarker.fromArray(new Point(0, MARKER_SIZE),
                 new Point(0, 0),
-                new Point(MARKER_SIZE, 0));
+                new Point(MARKER_SIZE, 0), new Point(MARKER_SIZE, MARKER_SIZE));
 
         workerFeeder = new LinkedBlockingQueue<Mat>(1);
         resultFeeder = new LinkedBlockingQueue<Mat>(1);
@@ -174,6 +175,7 @@ public class MyActivity extends Activity implements CameraBridgeViewBase.CvCamer
             return compositeFrameOut;
         }
 
+        Log.e(TAG, "Frame");
         // Get all 4-vertice polygons from contours:
         for (int i = 0; i < contours.size(); i++) {
             MatOfPoint2f input = new MatOfPoint2f(contours.get(i).toArray());
@@ -191,11 +193,12 @@ public class MyActivity extends Activity implements CameraBridgeViewBase.CvCamer
             Imgproc.warpPerspective(inputFrame.rgba(), out, tempPerspective,
                     new Size(MARKER_SIZE, MARKER_SIZE));
             // Check if marker
-            int ID = isMarker(out);
-            if (ID < 0)
+            Marker mark = isMarker(result, tempPerspective, out);
+            if (mark == null)
                 continue;
+            Log.e(TAG, "Added!");
             // Save marker candidate
-            markerCandidates.add(new Marker(result, tempPerspective, out));
+            markerCandidates.add(mark);
         }
 
         if (DEBUG_POLY) {
@@ -205,8 +208,22 @@ public class MyActivity extends Activity implements CameraBridgeViewBase.CvCamer
         }
 
         if (DEBUG_DRAW_FIRST_MARKER && !markerCandidates.isEmpty()) {
+            Log.e(TAG, markerCandidates.get(0).toString());
             // TODO Slow, needs to be done quicker!
-            Mat tempText = markerCandidates.get(0).getMarkerTextureReference();
+            Mat tempText = markerCandidates.get(0).texture;
+            boolean[][] tempBool = markerCandidates.get(0).getPattern();
+            int offset = RENDER_SCALE * MARKER_SIZE;
+            for (int i = 0; i < RENDER_SCALE * MARKER_SIZE; i++)
+                for (int j = 0; j < RENDER_SCALE * MARKER_SIZE; j++) {
+                    int x = i / MARKER_SQUARE / RENDER_SCALE,
+                            y = j / MARKER_SQUARE / RENDER_SCALE;
+                    if (x == 0 || y == 0 || x == MARKER_GRID - 1 || y ==
+                            MARKER_GRID - 1)
+                        compositeFrameOut.put(offset + i, j, BLACK);
+                    else
+                        compositeFrameOut.put(offset + i, j, tempBool[x - 1][y - 1] ?
+                                WHITE : BLACK);
+                }
             for (int i = 0; i < RENDER_SCALE * MARKER_SIZE; i++)
                 for (int j = 0; j < RENDER_SCALE * MARKER_SIZE; j++) {
                     compositeFrameOut.put(i, j, tempText.get(i / RENDER_SCALE,
@@ -215,19 +232,23 @@ public class MyActivity extends Activity implements CameraBridgeViewBase.CvCamer
         }
 
         if (DEBUG_DRAW_MARKER_NOTIFIER && !markerCandidates.isEmpty()) {
-            for (int i = 0; i < 4; i++)
-                for (int j = 0; j < 4; j++)
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
                     compositeFrameOut.put(i, j, GREEN);
         }
 
         return compositeFrameOut;
     }
 
+    private int angle = -1, id = -1;
+    private boolean[][] pattern = new boolean[4][4];
+
     /**
-     * @param texture
-     * @return
+     * @param result
+     * @param tempPerspective
+     * @param texture         @return
      */
-    private int isMarker(Mat texture) {
+    private Marker isMarker(MatOfPoint2f result, Mat tempPerspective, Mat texture) {
         Imgproc.cvtColor(texture, texture, Imgproc.COLOR_RGBA2GRAY);
         Imgproc.threshold(texture, texture, 40, 255, Imgproc.THRESH_BINARY);
         Imgproc.cvtColor(texture, texture, Imgproc.COLOR_GRAY2RGBA);
@@ -247,20 +268,32 @@ public class MyActivity extends Activity implements CameraBridgeViewBase.CvCamer
         }
 
         if (errorAllowance > SAMPLING_ERRORS)
-            return -1;
+            return null;
         // Now ID it:
-        int cornerCount = 0;
-        cornerCount += testSample(half + step, half + step, texture);
-        cornerCount += testSample(half + step, MARKER_SIZE - 1 - half - step,
+        for (int i = 0; i < 4; i++)
+            for (int j = 0; j < 4; j++) {
+                pattern[i][j] = (testSample(half + (i + 1) * step,
+                        half + (j + 1) * step, texture) > 0);
+            }
+
+        // Check corners & get rotation:
+        if (!pattern[0][0] && pattern[0][3] && pattern[3][0] && pattern[3][3]) {
+            angle = -90;
+        } else if (pattern[0][0] && !pattern[0][3] &&
+                pattern[0][3] && pattern[3][3]) {
+            angle = 0;
+        } else if (pattern[0][0] && pattern[0][3] &&
+                !pattern[3][0] && pattern[3][3]) {
+            angle = 180;
+        } else if (pattern[0][0] && pattern[0][3] &&
+                pattern[3][0] && !pattern[3][3]) {
+            angle = 90;
+        } else {
+            return null;
+        }
+        // TODO ERROR HERE; PATTERN NOT READ CORRECTLY!
+        return new Marker(result, tempPerspective, angle, id, pattern.clone(),
                 texture);
-        cornerCount += testSample(MARKER_SIZE - 1 - half - step, half + step,
-                texture);
-        cornerCount += testSample(MARKER_SIZE - 1 - half - step,
-                MARKER_SIZE - 1 - half - step, texture);
-        // 3 Corners white (+1), 1 black (-1)
-        if (cornerCount != 2)
-            return -1;
-        return 2;
     }
 
     private int countBlack = 0;

@@ -13,9 +13,14 @@ import org.opencv.core.MatOfPoint2f;
 public class Marker {
 
     /**
-     * The Matrix containing the original rgba texture of the marker.
+     * Stores bool representation of pattern
      */
-    private Mat markerTexture;
+    private boolean[][] pattern;
+    public Mat texture;
+    /**
+     * Contains angle.
+     */
+    private int angle;
     /**
      * Contains the perspective transform.
      */
@@ -34,16 +39,18 @@ public class Marker {
      * Constructor. COPIES all values!
      * @param originalCorners
      * @param markerPerspective
-     * @param markerTexture
      */
     // TODO: Consider which values will really be needed on the OpenGL side
     // and remove all others, as they only decrease speed!
-    public Marker(MatOfPoint2f originalCorners, Mat markerPerspective, Mat markerTexture
-    ) {
+    public Marker(MatOfPoint2f originalCorners, Mat markerPerspective,
+                  int angle, int id, boolean[][] pattern, Mat texture) {
+        this.id = id;
+        this.angle = angle;
         // MUST COPY ALL VALUES!
         this.originalCorners = new MatOfPoint2f(originalCorners.toArray());
         this.markerPerspective = markerPerspective.clone();
-        this.markerTexture = markerTexture.clone();
+        this.pattern = pattern.clone();
+        this.texture = texture.clone();
     }
 
     /**
@@ -54,12 +61,18 @@ public class Marker {
         return new MatOfPoint(originalCorners.toArray());
     }
 
-    /**
-     * Returns reference to original marker texture. WARNING; changes will be
-     * done on the original!
-     * @return
-     */
-    public Mat getMarkerTextureReference() {
-        return markerTexture;
+    public boolean[][] getPattern() {
+        return this.pattern;
+    }
+
+    public String toString() {
+        return ""+angle+"°|id:"+id+"\n"+pattern[0][0]+"|"+pattern[0][1
+                ]+"|"+pattern[0][2]+"|"+pattern[0][3]+"\n"
+                +pattern[1][0]+"|"+pattern[1][1
+                ]+"|"+pattern[1][2]+"|"+pattern[1][3]+"\n"
+                +pattern[2][0]+"|"+pattern[2][1
+                ]+"|"+pattern[2][2]+"|"+pattern[2][3]+"\n"
+                +pattern[3][0]+"|"+pattern[3][1
+                ]+"|"+pattern[3][2]+"|"+pattern[3][3]+"\n";
     }
 }
