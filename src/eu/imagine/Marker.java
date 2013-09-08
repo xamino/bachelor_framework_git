@@ -55,14 +55,6 @@ public class Marker {
     }
 
     /**
-     * Returns a <b>copy</b> of the marker texture.
-     * @return
-     */
-    public Mat getMarkerTextureCopy() {
-        return markerTexture.clone();
-    }
-
-    /**
      * Returns reference to original marker texture. WARNING; changes will be
      * done on the original!
      * @return
