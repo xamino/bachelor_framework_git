@@ -1,4 +1,4 @@
-package com.example.OpenCV;
+package eu.imagine;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -46,10 +46,10 @@ public class Marker {
                   int angle, int id, boolean[][] pattern, Mat texture) {
         this.id = id;
         this.angle = angle;
+        this.pattern = pattern;
         // MUST COPY ALL VALUES!
         this.originalCorners = new MatOfPoint2f(originalCorners.toArray());
         this.markerPerspective = markerPerspective.clone();
-        this.pattern = pattern.clone();
         this.texture = texture.clone();
     }
 

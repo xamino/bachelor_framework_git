@@ -1,4 +1,4 @@
-package com.example.OpenCV;
+package eu.imagine;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,48 +9,20 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.*;
-import org.opencv.imgproc.Imgproc;
+import org.opencv.core.Mat;
 
-import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class MyActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
+    // FLAG
+    public final boolean DEBUG = false;
+
     private static final String TAG = "OpenCV";
-    public static LinkedBlockingQueue<Mat> workerFeeder;
-    public static LinkedBlockingQueue<Mat> resultFeeder;
-
-    // FLAGS (compositeFrameOut order!)
-    private boolean USE_CANNY = false;
-    private boolean DEBUG_PREP_FRAME = false;
-    private boolean DEBUG_CONTOURS = false;
-    private boolean DEBUG_POLY = true;
-    private boolean DEBUG_DRAW_FIRST_MARKER = true;
-    private boolean DEBUG_DRAW_SAMPLING = true;
-    private boolean DEBUG_DRAW_MARKER_NOTIFIER = false;
-    // Multithreading
-    private final int PARALLEL_COUNT = 0;
-    // Important numbers
-    private final int MARKER_GRID = 6;
-    private final int MARKER_SQUARE = 3;
-    private final int MARKER_SIZE = MARKER_GRID * MARKER_SQUARE;
-    private final int RENDER_SCALE = 10;
-    private final int SAMPLING_ERRORS = 4;
-    private int step = MARKER_SIZE / MARKER_GRID;
-    private int half = step / 2;
-    private int errorAllowance = 0;
-
-    // Colors
-    private final double[] GREEN = new double[]{0, 255, 0, 0};
-    private final double[] RED = new double[]{255, 0, 0, 0};
-    private final double[] WHITE = new double[]{255, 255, 255, 0};
-    private final double[] BLACK = new double[]{0, 0, 0, 0};
-
-    Mat out, compositeFrameOut, tempPerspective;
-    ArrayList<MatOfPoint> contours, contoursAll;
-    ArrayList<Marker> markerCandidates;
-    MatOfPoint2f result, standardMarker;
+    public static LinkedBlockingQueue<TransportContainer> workerFeeder;
+    private Detector det;
+    private OpenCVWorker[] workers;
+    private final int PARALLEL_COUNT = 4;
 
     private CameraBridgeViewBase mOpenCvCameraView;
 
@@ -70,7 +42,6 @@ public class MyActivity extends Activity implements CameraBridgeViewBase.CvCamer
             }
         }
     };
-    private OpenCVWorker[] workers;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,7 +49,7 @@ public class MyActivity extends Activity implements CameraBridgeViewBase.CvCamer
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.main);
-        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.HelloOpenCvView);
+        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.OpenCVScreen);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
     }
@@ -105,20 +76,8 @@ public class MyActivity extends Activity implements CameraBridgeViewBase.CvCamer
     // On start, prepare things (instead of compositeFrameOut the constructor?):
     public void onCameraViewStarted(int width, int height) {
 
-        out = new Mat();
-        compositeFrameOut = new Mat();
-        contours = new ArrayList<MatOfPoint>();
-        contoursAll = new ArrayList<MatOfPoint>();
-        markerCandidates = new ArrayList<Marker>();
-        result = new MatOfPoint2f();
-        // Prepare standard marker:
-        standardMarker = new MatOfPoint2f();
-        standardMarker.fromArray(new Point(0, MARKER_SIZE),
-                new Point(0, 0),
-                new Point(MARKER_SIZE, 0), new Point(MARKER_SIZE, MARKER_SIZE));
-
-        workerFeeder = new LinkedBlockingQueue<Mat>(1);
-        resultFeeder = new LinkedBlockingQueue<Mat>(1);
+        det = new Detector();
+        workerFeeder = new LinkedBlockingQueue<TransportContainer>(1);
 
         workers = new OpenCVWorker[PARALLEL_COUNT];
 
@@ -141,184 +100,21 @@ public class MyActivity extends Activity implements CameraBridgeViewBase.CvCamer
      * @return
      */
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        contours.clear();
-        contoursAll.clear();
-        markerCandidates.clear();
-
-        if (USE_CANNY) {
-            Imgproc.Canny(inputFrame.gray(), out, 50, 150);
-        } else {
-            // Imgproc.threshold(inputFrame.gray(), out, 127, 255, Imgproc.THRESH_BINARY);
-            Imgproc.adaptiveThreshold(inputFrame.gray(), out, 255,
-                    Imgproc.ADAPTIVE_THRESH_MEAN_C,
-                    Imgproc.THRESH_BINARY, 81, 7);
+        // If debug, do everything in line:
+        if (DEBUG) {
+            return det.detect(inputFrame.gray(), inputFrame.rgba());
         }
-
-        if (DEBUG_PREP_FRAME)
-            return out;
-
-        Imgproc.findContours(out.clone(), contoursAll, new Mat(),
-                Imgproc.RETR_LIST,
-                Imgproc.CHAIN_APPROX_NONE);
-        // Remove too small contours:
-        for (MatOfPoint contour : contoursAll) {
-            // TODO: Set good threshold (depends on marker size!)
-            if (contour.total() > 250)
-                contours.add(contour);
-        }
-
-        compositeFrameOut = inputFrame.rgba();
-
-        // DEBUG
-        if (DEBUG_CONTOURS) {
-            Imgproc.drawContours(compositeFrameOut, contours, -1, new Scalar(255, 0, 0), 2);
-            return compositeFrameOut;
-        }
-
-        Log.e(TAG, "Frame");
-        // Get all 4-vertice polygons from contours:
-        for (int i = 0; i < contours.size(); i++) {
-            MatOfPoint2f input = new MatOfPoint2f(contours.get(i).toArray());
-            Imgproc.approxPolyDP(input, result, input.total() * 0.05,
-                    true);
-            // Only take contours with ==4 points
-            if (result.total() != 4 || !Imgproc.isContourConvex(new
-                    MatOfPoint(result.toArray()))) {
-                continue;
+        // Else put the task on multiple threads:
+        else {
+            try {
+                workerFeeder.put(new TransportContainer(inputFrame.gray().clone(),
+                        inputFrame.rgba().clone()));
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Error feeding!");
+                return inputFrame.gray();
             }
-            // Calculate perspective transform
-            tempPerspective = Imgproc.getPerspectiveTransform(result,
-                    standardMarker);
-            // Apply to get marker texture
-            Imgproc.warpPerspective(inputFrame.rgba(), out, tempPerspective,
-                    new Size(MARKER_SIZE, MARKER_SIZE));
-            // Check if marker
-            Marker mark = isMarker(result, tempPerspective, out);
-            if (mark == null)
-                continue;
-            Log.e(TAG, "Added!");
-            // Save marker candidate
-            markerCandidates.add(mark);
+            return inputFrame.rgba();
         }
-
-        if (DEBUG_POLY) {
-            ArrayList<MatOfPoint> temp = new ArrayList<MatOfPoint>();
-            for (Marker mark : markerCandidates) temp.add(mark.getMOPCorners());
-            Core.polylines(compositeFrameOut, temp, true, new Scalar(255, 0, 0), 2);
-        }
-
-        if (DEBUG_DRAW_FIRST_MARKER && !markerCandidates.isEmpty()) {
-            Log.e(TAG, markerCandidates.get(0).toString());
-            // TODO Slow, needs to be done quicker!
-            Mat tempText = markerCandidates.get(0).texture;
-            boolean[][] tempBool = markerCandidates.get(0).getPattern();
-            int offset = RENDER_SCALE * MARKER_SIZE;
-            for (int i = 0; i < RENDER_SCALE * MARKER_SIZE; i++)
-                for (int j = 0; j < RENDER_SCALE * MARKER_SIZE; j++) {
-                    int x = i / MARKER_SQUARE / RENDER_SCALE,
-                            y = j / MARKER_SQUARE / RENDER_SCALE;
-                    if (x == 0 || y == 0 || x == MARKER_GRID - 1 || y ==
-                            MARKER_GRID - 1)
-                        compositeFrameOut.put(offset + i, j, BLACK);
-                    else
-                        compositeFrameOut.put(offset + i, j, tempBool[x - 1][y - 1] ?
-                                WHITE : BLACK);
-                }
-            for (int i = 0; i < RENDER_SCALE * MARKER_SIZE; i++)
-                for (int j = 0; j < RENDER_SCALE * MARKER_SIZE; j++) {
-                    compositeFrameOut.put(i, j, tempText.get(i / RENDER_SCALE,
-                            j / RENDER_SCALE));
-                }
-        }
-
-        if (DEBUG_DRAW_MARKER_NOTIFIER && !markerCandidates.isEmpty()) {
-            for (int i = 0; i < 8; i++)
-                for (int j = 0; j < 8; j++)
-                    compositeFrameOut.put(i, j, GREEN);
-        }
-
-        return compositeFrameOut;
     }
 
-    private int angle = -1, id = -1;
-    private boolean[][] pattern = new boolean[4][4];
-
-    /**
-     * @param result
-     * @param tempPerspective
-     * @param texture         @return
-     */
-    private Marker isMarker(MatOfPoint2f result, Mat tempPerspective, Mat texture) {
-        Imgproc.cvtColor(texture, texture, Imgproc.COLOR_RGBA2GRAY);
-        Imgproc.threshold(texture, texture, 40, 255, Imgproc.THRESH_BINARY);
-        Imgproc.cvtColor(texture, texture, Imgproc.COLOR_GRAY2RGBA);
-
-        // reset error allowance
-        errorAllowance = 0;
-        // Check border:
-        for (int i = 1; i < MARKER_GRID - 1; i++) {
-            if (testSample(half + i * step, half, texture) > 0)
-                errorAllowance++;
-            if (testSample(half, half + i * step, texture) > 0)
-                errorAllowance++;
-            if (testSample(half + i * step, MARKER_SIZE - 1 - half, texture) > 0)
-                errorAllowance++;
-            if (testSample(MARKER_SIZE - 1 - half, half + i * step, texture) > 0)
-                errorAllowance++;
-        }
-
-        if (errorAllowance > SAMPLING_ERRORS)
-            return null;
-        // Now ID it:
-        for (int i = 0; i < 4; i++)
-            for (int j = 0; j < 4; j++) {
-                pattern[i][j] = (testSample(half + (i + 1) * step,
-                        half + (j + 1) * step, texture) > 0);
-            }
-
-        // Check corners & get rotation:
-        if (!pattern[0][0] && pattern[0][3] && pattern[3][0] && pattern[3][3]) {
-            angle = -90;
-        } else if (pattern[0][0] && !pattern[0][3] &&
-                pattern[0][3] && pattern[3][3]) {
-            angle = 0;
-        } else if (pattern[0][0] && pattern[0][3] &&
-                !pattern[3][0] && pattern[3][3]) {
-            angle = 180;
-        } else if (pattern[0][0] && pattern[0][3] &&
-                pattern[3][0] && !pattern[3][3]) {
-            angle = 90;
-        } else {
-            return null;
-        }
-        // TODO ERROR HERE; PATTERN NOT READ CORRECTLY!
-        return new Marker(result, tempPerspective, angle, id, pattern.clone(),
-                texture);
-    }
-
-    private int countBlack = 0;
-
-    /**
-     * @param x
-     * @param y
-     * @param texture
-     * @return Negative for black, positive for white
-     */
-    private int testSample(int x, int y, Mat texture) {
-        countBlack = 0;
-        for (int i = -MARKER_SQUARE / 2; i <= MARKER_SQUARE / 2; i++)
-            for (int j = -MARKER_SQUARE / 2; j <= MARKER_SQUARE / 2; j++) {
-                if (texture.get(x + i, y + j)[0] == 0d)
-                    countBlack++;
-            }
-        if (countBlack > SAMPLING_ERRORS) {
-            if (DEBUG_DRAW_SAMPLING)
-                texture.put(x, y, GREEN);
-            return -1;
-        } else {
-            if (DEBUG_DRAW_SAMPLING)
-                texture.put(x, y, RED);
-            return 1;
-        }
-    }
 }
