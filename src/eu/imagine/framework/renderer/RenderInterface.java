@@ -27,7 +27,11 @@ public class RenderInterface{
         log.log(TAG, "Created.");
     }
 
-    public void onDestroy() {
+    public void onResume() {
+        mGLView.onResume();
+    }
 
+    public void onPause() {
+        mGLView.onPause();
     }
 }

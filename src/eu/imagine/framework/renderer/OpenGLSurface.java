@@ -1,7 +1,6 @@
 package eu.imagine.framework.renderer;
 
 import android.content.Context;
-import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 
 /**
@@ -14,8 +13,8 @@ public class OpenGLSurface extends GLSurfaceView {
     public OpenGLSurface(Context context) {
         super(context);
         setEGLContextClientVersion(2);
-        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        getHolder().setFormat(PixelFormat.TRANSLUCENT);
+        //setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        //getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
         // CALL LAST:
         setRenderer(new OpenGLRenderer());

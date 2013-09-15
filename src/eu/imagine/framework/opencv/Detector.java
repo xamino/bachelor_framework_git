@@ -28,8 +28,8 @@ public class Detector {
     public boolean USE_CANNY = false;
     public boolean DEBUG_PREP_FRAME = false;
     public boolean DEBUG_CONTOURS = false;
-    public boolean DEBUG_POLY = false;
-    public boolean DEBUG_DRAW_MARKERS = false;
+    public boolean DEBUG_POLY = true;
+    public boolean DEBUG_DRAW_MARKERS = true;
     public boolean DEBUG_DRAW_MARKER_ID = false;
     public boolean DEBUG_DRAW_SAMPLING = false;
 

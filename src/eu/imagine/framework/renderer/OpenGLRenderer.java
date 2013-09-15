@@ -30,10 +30,10 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl) {
+        log.log(TAG, "Rendering frame");
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         try {
             MainInterface.detectedMarkers.take();
-            log.log(TAG, "Got markers!");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

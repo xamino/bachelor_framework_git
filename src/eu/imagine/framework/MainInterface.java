@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class MainInterface {
 
     // Allow debug logging:
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
     public static final boolean DEBUG_FRAME = false;
 
     // Linking variables to sub classes:
@@ -59,15 +59,16 @@ public class MainInterface {
 
     public void onResume(Activity mainActivity) {
         opencv.onResume(mainActivity);
+        render.onResume();
     }
 
     public void onPause(Activity mainActivity) {
         opencv.onPause();
+        render.onPause();
     }
 
     public void onDestroy(Activity mainActivity) {
         opencv.onDestroy();
-        render.onDestroy();
         log.log(TAG, "Stopping.");
     }
 }
