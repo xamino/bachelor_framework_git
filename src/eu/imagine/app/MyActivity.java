@@ -1,10 +1,14 @@
-package eu.imagine;
+package eu.imagine.app;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.WindowManager;
+import eu.imagine.R;
+import eu.imagine.framework.opencv.Detector;
+import eu.imagine.framework.opencv.OpenCVWorker;
+import eu.imagine.framework.opencv.TransportContainer;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;

@@ -1,4 +1,4 @@
-package eu.imagine;
+package eu.imagine.framework.opencv;
 
 import org.opencv.core.Mat;
 

@@ -1,6 +1,7 @@
-package eu.imagine;
+package eu.imagine.framework.opencv;
 
 import android.util.Log;
+import eu.imagine.app.MyActivity;
 
 /**
  * Created with IntelliJ IDEA.
