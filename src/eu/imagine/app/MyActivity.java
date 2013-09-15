@@ -2,7 +2,8 @@ package eu.imagine.app;
 
 import android.app.Activity;
 import android.os.Bundle;
-import eu.imagine.framework.controller.MainInterface;
+import eu.imagine.R;
+import eu.imagine.framework.MainInterface;
 
 public class MyActivity extends Activity {
 
@@ -13,8 +14,10 @@ public class MyActivity extends Activity {
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
         framework = new MainInterface();
-        framework.onCreate(savedInstanceState, this);
+        framework.onCreate(savedInstanceState, this,
+                findViewById(R.id.OpenCVScreen), findViewById(R.id.OpenGL));
     }
 
     public void onResume() {

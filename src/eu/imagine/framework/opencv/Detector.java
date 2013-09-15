@@ -1,5 +1,6 @@
 package eu.imagine.framework.opencv;
 
+import eu.imagine.framework.MainInterface;
 import eu.imagine.framework.messenger.Messenger;
 import eu.imagine.framework.messenger.TimerResult;
 import org.opencv.core.*;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 public class Detector {
 
     private Messenger log;
+    private final String TAG = "Detector";
 
     // FLAGS (compositeFrameOut order!)
     public boolean USE_CANNY = false;
@@ -41,10 +43,10 @@ public class Detector {
     private int half = step / 2;
 
     // Important reused vars
-    Mat out, compositeFrameOut, tempPerspective;
-    ArrayList<MatOfPoint> contours, contoursAll;
-    ArrayList<Marker> markerCandidates;
-    MatOfPoint2f result, standardMarker;
+    private Mat out, compositeFrameOut, tempPerspective;
+    private ArrayList<MatOfPoint> contours, contoursAll;
+    private ArrayList<Marker> markerCandidates;
+    private MatOfPoint2f result, standardMarker;
 
     // Colors
     private final double[] GREEN = new double[]{0, 255, 0, 0};
@@ -68,7 +70,8 @@ public class Detector {
     }
 
     public Mat detect(Mat gray, Mat rgba) {
-        log.pushTimer("frame");
+        if (MainInterface.DEBUG)
+            log.pushTimer(this, "frame");
         contours.clear();
         contoursAll.clear();
         markerCandidates.clear();
@@ -172,9 +175,20 @@ public class Detector {
             }
         }
 
-        TimerResult timer = log.popTimer();
-        log.debug("DETECTOR", "Detected "+markerCandidates.size()+" markers " +
-                "in " + timer.time + "ms.");
+        if (MainInterface.DEBUG) {
+            TimerResult timer = log.popTimer(this);
+            log.debug(TAG, "Detected " + markerCandidates.size() + " markers " +
+                    "in " + timer.time + "ms.");
+        }
+
+        /*
+        try {
+            MainInterface.detectedMarkers.put(markerCandidates);
+        } catch (InterruptedException e) {
+            log.log(TAG, "Error placing markers in queue!");
+            e.printStackTrace();
+        }
+        */
 
         return compositeFrameOut;
     }
@@ -231,8 +245,8 @@ public class Detector {
     }
 
     /**
-     * @param x X-Coordinate.
-     * @param y Y-Coordinate.
+     * @param x       X-Coordinate.
+     * @param y       Y-Coordinate.
      * @param texture Reference to texture.
      * @return Negative for black, positive for white
      */

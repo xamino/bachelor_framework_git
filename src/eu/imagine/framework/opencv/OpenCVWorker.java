@@ -1,6 +1,6 @@
 package eu.imagine.framework.opencv;
 
-import android.util.Log;
+import eu.imagine.framework.messenger.Messenger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,12 +13,14 @@ public class OpenCVWorker extends Thread {
     private final String TAG;
     private TransportContainer in;
     private Detector det;
+    private Messenger log;
 
     public OpenCVWorker(String tag) {
         super();
         super.setPriority(Thread.MAX_PRIORITY);
         this.TAG = tag;
         this.det = new Detector();
+        log = Messenger.getInstance();
     }
 
     @Override
@@ -27,7 +29,7 @@ public class OpenCVWorker extends Thread {
             try {
                 in = OpenCVInterface.workerFeeder.take();
             } catch (InterruptedException e) {
-                Log.e(TAG, "[FAIL] Error taking Mat from queue!");
+                log.log(TAG, "Error taking Mat from queue!");
                 e.printStackTrace();
                 continue;
             }

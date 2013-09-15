@@ -1,11 +1,9 @@
 package eu.imagine.framework.opencv;
 
 import android.app.Activity;
-import android.os.Bundle;
 import android.view.SurfaceView;
-import android.view.WindowManager;
-import eu.imagine.R;
-import eu.imagine.framework.controller.MainInterface;
+import android.view.View;
+import eu.imagine.framework.MainInterface;
 import eu.imagine.framework.messenger.Messenger;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -43,7 +41,6 @@ public class OpenCVInterface implements CameraBridgeViewBase
             public void onManagerConnected(int status) {
                 switch (status) {
                     case LoaderCallbackInterface.SUCCESS: {
-                        log.log(TAG, "OpenCV loaded successfully");
                         mOpenCvCameraView.enableView();
                     }
                     break;
@@ -85,7 +82,7 @@ public class OpenCVInterface implements CameraBridgeViewBase
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         // If debug, do everything in line:
-        if (MainInterface.DEBUG) {
+        if (MainInterface.DEBUG_FRAME) {
             return det.detect(inputFrame.gray(), inputFrame.rgba());
         }
         // Else put the task on multiple threads:
@@ -101,15 +98,12 @@ public class OpenCVInterface implements CameraBridgeViewBase
         }
     }
 
-    public void onCreate(Bundle savedInstanceState, Activity mainActivity) {
-        mainActivity.getWindow().addFlags(WindowManager.LayoutParams
-                .FLAG_KEEP_SCREEN_ON);
-        mainActivity.setContentView(R.layout.main);
-        mOpenCvCameraView = (CameraBridgeViewBase) mainActivity.findViewById
-                (R.id.OpenCVScreen);
+    public void onCreate(View cameraView) {
+        this.log = Messenger.getInstance();
+        mOpenCvCameraView = (CameraBridgeViewBase) cameraView;
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
-        this.log = Messenger.getInstance();
+        log.log(TAG, "Created.");
     }
 
     public void onResume(Activity mainActivity) {
@@ -117,12 +111,12 @@ public class OpenCVInterface implements CameraBridgeViewBase
                 mLoaderCallback);
     }
 
-    public void onPause(Activity mainActivity) {
+    public void onPause() {
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
     }
 
-    public void onDestroy(Activity mainActivity) {
+    public void onDestroy() {
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
     }

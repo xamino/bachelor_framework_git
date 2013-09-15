@@ -1,8 +1,11 @@
 package eu.imagine.framework.messenger;
 
 import android.util.Log;
-import eu.imagine.framework.controller.MainInterface;
+import eu.imagine.framework.MainInterface;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -20,7 +23,7 @@ public class Messenger {
     /**
      * The stack with which the TimerResult objects are managed.
      */
-    private Stack<TimerResult> timerStack;
+    private HashMap<Object, Stack<TimerResult>> timers;
 
     /**
      * Method to return the singleton instance of Messenger.
@@ -38,7 +41,7 @@ public class Messenger {
      * Messenger, ust the getInstance Method.
      */
     private Messenger() {
-        this.timerStack = new Stack<TimerResult>();
+        this.timers = new HashMap<Object, Stack<TimerResult>>();
     }
 
     /**
@@ -68,9 +71,27 @@ public class Messenger {
      *
      * @param label The label to remember for the timer.
      */
-    public void pushTimer(final String label) {
-        this.timerStack.push(new TimerResult(System.currentTimeMillis(),
-                label));
+    public void pushTimer(Object object, final String label) {
+        // Make sure that we don't keep too many objects:
+        if (timers.size() > 32) {
+            log("Messenger", "WARNING: Excessive amount of stacks required " +
+                    "for timer function – possible memory leak!");
+            Iterator<Map.Entry<Object,Stack<TimerResult>>> it = timers.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Object, Stack<TimerResult>> pairs = it.next();
+                if ((pairs.getValue()).isEmpty()) {
+                    it.remove();
+                }
+            }
+        }
+        TimerResult data = new TimerResult(System.currentTimeMillis(), label);
+        if (timers.containsKey(object)) {
+            timers.get(object).push(data);
+        } else {
+            Stack<TimerResult> stack = new Stack<TimerResult>();
+            stack.push(data);
+            timers.put(object, stack);
+        }
     }
 
     /**
@@ -80,14 +101,19 @@ public class Messenger {
      *
      * @return The TimerResult object containing the time difference and the
      *         label. If the stack is empty (meaning more pops than pushes
-     *         were done), an object with time "0" and label "EMPTY STACK" are
+     *         were done), an object with time "-1" and label "EMPTY STACK" are
      *         returned.
      */
-    public TimerResult popTimer() {
-        if (this.timerStack.isEmpty())
-            return new TimerResult(0, "EMPTY STACK");
-        TimerResult poped = this.timerStack.pop();
-        poped.time = System.currentTimeMillis() - poped.time;
-        return poped;
+    public TimerResult popTimer(Object object) {
+        if (timers.containsKey(object)) {
+            Stack<TimerResult> stack = timers.get(object);
+            if (stack.isEmpty())
+                return new TimerResult(-1, "EMPTY STACK");
+            TimerResult poped = stack.pop();
+            poped.time = System.currentTimeMillis() - poped.time;
+            return poped;
+        } else {
+            return new TimerResult(-1, "OBJECT HAS NO STACK");
+        }
     }
 }
