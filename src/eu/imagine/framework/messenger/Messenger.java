@@ -10,9 +10,12 @@ import java.util.Stack;
 
 /**
  * Created with IntelliJ IDEA.
- * User: tamino
+ * User: Tamino Hartmann
  * Date: 9/15/13
  * Time: 1:09 PM
+ * <p/>
+ * This class implements a thread safe timer for multiple objects and
+ * standardized logging functions for the framework.
  */
 public class Messenger {
 
@@ -28,9 +31,9 @@ public class Messenger {
     /**
      * Method to return the singleton instance of Messenger.
      *
-     * @return
+     * @return Instance of Messenger.
      */
-    public static Messenger getInstance() {
+    public synchronized static Messenger getInstance() {
         if (INSTANCE == null)
             INSTANCE = new Messenger();
         return INSTANCE;
@@ -50,7 +53,7 @@ public class Messenger {
      * @param tag     The tag used when logging after the internal tag.
      * @param content The content of the message to log.
      */
-    public void log(final String tag, final String content) {
+    public synchronized void log(final String tag, final String content) {
         Log.i("Messenger|" + tag, content);
     }
 
@@ -61,7 +64,7 @@ public class Messenger {
      * @param tag     The tag used after the internal tag.
      * @param content The content of the message to log.
      */
-    public void debug(final String tag, final String content) {
+    public synchronized void debug(final String tag, final String content) {
         if (MainInterface.DEBUG)
             Log.d("Messenger|" + tag, content);
     }
@@ -69,14 +72,15 @@ public class Messenger {
     /**
      * Method for placing a timer object on the stack with the given label.
      *
-     * @param label The label to remember for the timer.
+     * @param object Object reference to allow the correct stack to be used.
+     * @param label  The label to remember for the timer.
      */
-    public void pushTimer(Object object, final String label) {
+    public synchronized void pushTimer(Object object, final String label) {
         // Make sure that we don't keep too many objects:
         if (timers.size() > 32) {
             log("Messenger", "WARNING: Excessive amount of stacks required " +
                     "for timer function – possible memory leak!");
-            Iterator<Map.Entry<Object,Stack<TimerResult>>> it = timers.entrySet().iterator();
+            Iterator<Map.Entry<Object, Stack<TimerResult>>> it = timers.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<Object, Stack<TimerResult>> pairs = it.next();
                 if ((pairs.getValue()).isEmpty()) {
@@ -99,12 +103,14 @@ public class Messenger {
      * contains the time spent between push and pop,
      * and the label placed originally.
      *
+     * @param object Reference to object from which we will use the timer
+     *               stack.
      * @return The TimerResult object containing the time difference and the
      *         label. If the stack is empty (meaning more pops than pushes
      *         were done), an object with time "-1" and label "EMPTY STACK" are
      *         returned.
      */
-    public TimerResult popTimer(Object object) {
+    public synchronized TimerResult popTimer(Object object) {
         if (timers.containsKey(object)) {
             Stack<TimerResult> stack = timers.get(object);
             if (stack.isEmpty())
