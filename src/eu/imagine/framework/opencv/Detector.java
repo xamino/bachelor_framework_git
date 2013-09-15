@@ -1,5 +1,7 @@
 package eu.imagine.framework.opencv;
 
+import eu.imagine.framework.messenger.Messenger;
+import eu.imagine.framework.messenger.TimerResult;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
@@ -17,6 +19,8 @@ import java.util.ArrayList;
  * outside.
  */
 public class Detector {
+
+    private Messenger log;
 
     // FLAGS (compositeFrameOut order!)
     public boolean USE_CANNY = false;
@@ -49,6 +53,7 @@ public class Detector {
     private final double[] BLACK = new double[]{0, 0, 0, 0};
 
     public Detector() {
+        log = Messenger.getInstance();
         out = new Mat();
         compositeFrameOut = new Mat();
         contours = new ArrayList<MatOfPoint>();
@@ -63,6 +68,7 @@ public class Detector {
     }
 
     public Mat detect(Mat gray, Mat rgba) {
+        log.pushTimer("frame");
         contours.clear();
         contoursAll.clear();
         markerCandidates.clear();
@@ -166,7 +172,9 @@ public class Detector {
             }
         }
 
-        // Log.d("DETECTOR", "Detected "+markerCandidates.size()+" markers.");
+        TimerResult timer = log.popTimer();
+        log.debug("DETECTOR", "Detected "+markerCandidates.size()+" markers " +
+                "in " + timer.time + "ms.");
 
         return compositeFrameOut;
     }

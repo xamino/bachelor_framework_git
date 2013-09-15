@@ -1,6 +1,7 @@
 package eu.imagine.framework.messenger;
 
 import android.util.Log;
+import eu.imagine.framework.controller.MainInterface;
 
 import java.util.Stack;
 
@@ -47,7 +48,19 @@ public class Messenger {
      * @param content The content of the message to log.
      */
     public void log(final String tag, final String content) {
-        Log.d("Messenger|" + tag, content);
+        Log.i("Messenger|" + tag, content);
+    }
+
+    /**
+     * Method for logging only debugging content. DEBUG is set in
+     * MainInterface.
+     *
+     * @param tag     The tag used after the internal tag.
+     * @param content The content of the message to log.
+     */
+    public void debug(final String tag, final String content) {
+        if (MainInterface.DEBUG)
+            Log.d("Messenger|" + tag, content);
     }
 
     /**

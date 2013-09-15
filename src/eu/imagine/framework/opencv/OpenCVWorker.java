@@ -1,7 +1,6 @@
 package eu.imagine.framework.opencv;
 
 import android.util.Log;
-import eu.imagine.app.MyActivity;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,7 +25,7 @@ public class OpenCVWorker extends Thread {
     public void run() {
         while (!this.isInterrupted()) {
             try {
-                in = MyActivity.workerFeeder.take();
+                in = OpenCVInterface.workerFeeder.take();
             } catch (InterruptedException e) {
                 Log.e(TAG, "[FAIL] Error taking Mat from queue!");
                 e.printStackTrace();
