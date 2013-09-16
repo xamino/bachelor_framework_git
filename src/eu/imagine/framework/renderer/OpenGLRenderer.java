@@ -2,6 +2,7 @@ package eu.imagine.framework.renderer;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import eu.imagine.framework.MainInterface;
 import eu.imagine.framework.messenger.Messenger;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -24,18 +25,23 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        GLES20.glClearColor(1f, 1f, 1f, 0.5f);
+        GLES20.glClearColor(1f, 0f, 0f, 0.1f);
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        // GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        if (MainInterface.DEBUG_LOGGING)
+            log.pushTimer(this, "opengl frame");
+        GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         /*try {
             MainInterface.detectedMarkers.take();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }*/
+        if (MainInterface.DEBUG_LOGGING) {
+            log.debug(TAG, "OpenGL rendered frame in " + log.popTimer(this).time
+                    + "ms.");
+        }
     }
 
     @Override

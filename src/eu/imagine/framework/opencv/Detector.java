@@ -70,7 +70,7 @@ public class Detector {
     }
 
     public Mat detect(Mat gray, Mat rgba) {
-        if (MainInterface.DEBUG)
+        if (MainInterface.DEBUG_LOGGING)
             log.pushTimer(this, "frame");
         contours.clear();
         contoursAll.clear();
@@ -98,7 +98,7 @@ public class Detector {
 
         compositeFrameOut = rgba;
 
-        // DEBUG
+        // DEBUG_LOGGING
         if (DEBUG_CONTOURS) {
             Imgproc.drawContours(compositeFrameOut, contours, -1, new Scalar(255, 0, 0), 2);
             return compositeFrameOut;
@@ -175,7 +175,7 @@ public class Detector {
             }
         }
 
-        if (MainInterface.DEBUG) {
+        if (MainInterface.DEBUG_LOGGING) {
             TimerResult timer = log.popTimer(this);
             log.debug(TAG, "Detected " + markerCandidates.size() + " markers " +
                     "in " + timer.time + "ms.");

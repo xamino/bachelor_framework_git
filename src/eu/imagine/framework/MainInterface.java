@@ -2,12 +2,14 @@ package eu.imagine.framework;
 
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
-import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import eu.imagine.framework.messenger.Messenger;
 import eu.imagine.framework.opencv.Marker;
 import eu.imagine.framework.opencv.OpenCVInterface;
 import eu.imagine.framework.renderer.RenderInterface;
+import org.opencv.android.JavaCameraView;
 
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -21,8 +23,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class MainInterface {
 
     // Allow debug logging:
-    public static final boolean DEBUG = false;
-    public static final boolean DEBUG_FRAME = false;
+    public static boolean DEBUG_LOGGING = true;
+    public static boolean RUN_OPENCV = true;
+    public static boolean RUN_RENDERER = true;
+    public static boolean DEBUG_FRAME = false;
 
     // Linking variables to sub classes:
     private Messenger log;
@@ -34,22 +38,34 @@ public class MainInterface {
     public static LinkedBlockingQueue<ArrayList<Marker>> detectedMarkers =
             new LinkedBlockingQueue<ArrayList<Marker>>(1);
 
-    public void onCreate(Activity mainActivity, View cameraView, View renderView) {
+    public void onCreate(Activity mainActivity, ViewGroup groupView) {
         log = Messenger.getInstance();
         log.log(TAG, "Starting framework.");
         // Sanity check:
-        if (cameraView == null || renderView == null)
-            log.log(TAG, "Framework will crash, cameraView or renderView are " +
+        if (groupView == null)
+            log.log(TAG, "Framework will crash, cameraView or renderView are" +
+                    " " +
                     "NULL!");
-        if (!(renderView instanceof GLSurfaceView))
-            log.log(TAG, "Framework will crash, renderView is not an " +
-                    "GLSurfaceView view!");
         log.pushTimer(this, "start");
-        opencv = new OpenCVInterface(mainActivity);
-        render = new RenderInterface();
-        // do onCreate. Note that the views are also assigned here.
-        render.onCreate((GLSurfaceView)renderView);
-        opencv.onCreate(cameraView);
+        if (RUN_OPENCV) {
+            opencv = new OpenCVInterface(mainActivity);
+            JavaCameraView cameraView = new JavaCameraView(mainActivity,
+                    JavaCameraView.CAMERA_ID_ANY);
+            cameraView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup
+                    .LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            cameraView.enableFpsMeter();
+            cameraView.setVisibility(JavaCameraView.GONE);
+            groupView.addView(cameraView);
+            opencv.onCreate(cameraView);
+        }
+        if (RUN_RENDERER) {
+            render = new RenderInterface();
+            GLSurfaceView renderView = new GLSurfaceView(mainActivity);
+            renderView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup
+                    .LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            groupView.addView(renderView);
+            render.onCreate(renderView);
+        }
 
         // Set layout things:
         mainActivity.getWindow().addFlags(WindowManager.LayoutParams
@@ -60,17 +76,22 @@ public class MainInterface {
     }
 
     public void onResume(Activity mainActivity) {
-        opencv.onResume(mainActivity);
-        render.onResume();
+        if (RUN_OPENCV)
+            opencv.onResume(mainActivity);
+        if (RUN_RENDERER)
+            render.onResume();
     }
 
     public void onPause() {
-        opencv.onPause();
-        render.onPause();
+        if (RUN_OPENCV)
+            opencv.onPause();
+        if (RUN_RENDERER)
+            render.onPause();
     }
 
     public void onDestroy() {
-        opencv.onDestroy();
+        if (RUN_OPENCV)
+            opencv.onDestroy();
         log.log(TAG, "Stopping.");
     }
 }

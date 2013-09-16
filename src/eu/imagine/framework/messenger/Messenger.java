@@ -58,14 +58,14 @@ public class Messenger {
     }
 
     /**
-     * Method for logging only debugging content. DEBUG is set in
+     * Method for logging only debugging content. DEBUG_LOGGING is set in
      * MainInterface.
      *
      * @param tag     The tag used after the internal tag.
      * @param content The content of the message to log.
      */
     public synchronized void debug(final String tag, final String content) {
-        if (MainInterface.DEBUG)
+        if (MainInterface.DEBUG_LOGGING)
             Log.d("Messenger|" + tag, content);
     }
 
