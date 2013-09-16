@@ -1,7 +1,7 @@
 package eu.imagine.framework;
 
 import android.app.Activity;
-import android.os.Bundle;
+import android.opengl.GLSurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import eu.imagine.framework.messenger.Messenger;
@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class MainInterface {
 
     // Allow debug logging:
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final boolean DEBUG_FRAME = false;
 
     // Linking variables to sub classes:
@@ -34,19 +34,21 @@ public class MainInterface {
     public static LinkedBlockingQueue<ArrayList<Marker>> detectedMarkers =
             new LinkedBlockingQueue<ArrayList<Marker>>(1);
 
-    public void onCreate(Bundle savedInstanceState, Activity mainActivity,
-                         View cameraView, View renderView) {
+    public void onCreate(Activity mainActivity, View cameraView, View renderView) {
         log = Messenger.getInstance();
         log.log(TAG, "Starting framework.");
         // Sanity check:
         if (cameraView == null || renderView == null)
             log.log(TAG, "Framework will crash, cameraView or renderView are " +
                     "NULL!");
+        if (!(renderView instanceof GLSurfaceView))
+            log.log(TAG, "Framework will crash, renderView is not an " +
+                    "GLSurfaceView view!");
         log.pushTimer(this, "start");
         opencv = new OpenCVInterface(mainActivity);
         render = new RenderInterface();
         // do onCreate. Note that the views are also assigned here.
-        render.onCreate(mainActivity, renderView);
+        render.onCreate((GLSurfaceView)renderView);
         opencv.onCreate(cameraView);
 
         // Set layout things:
@@ -62,12 +64,12 @@ public class MainInterface {
         render.onResume();
     }
 
-    public void onPause(Activity mainActivity) {
+    public void onPause() {
         opencv.onPause();
         render.onPause();
     }
 
-    public void onDestroy(Activity mainActivity) {
+    public void onDestroy() {
         opencv.onDestroy();
         log.log(TAG, "Stopping.");
     }

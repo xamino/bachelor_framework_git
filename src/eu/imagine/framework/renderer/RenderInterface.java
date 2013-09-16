@@ -1,8 +1,7 @@
 package eu.imagine.framework.renderer;
 
-import android.app.Activity;
+import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
-import android.view.View;
 import eu.imagine.framework.messenger.Messenger;
 
 /**
@@ -11,7 +10,7 @@ import eu.imagine.framework.messenger.Messenger;
  * Date: 9/15/13
  * Time: 3:05 PM
  */
-public class RenderInterface{
+public class RenderInterface {
 
     private Messenger log;
     private final String TAG = "RenderInterface";
@@ -21,9 +20,14 @@ public class RenderInterface{
         log = Messenger.getInstance();
     }
 
-    public void onCreate(Activity mainActivity, View renderView) {
-        mGLView = new OpenGLSurface(mainActivity.getApplicationContext());
-        renderView = mGLView;
+    public void onCreate(GLSurfaceView renderView) {
+        mGLView = renderView;
+        mGLView.setEGLContextClientVersion(2);
+        mGLView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        mGLView.setRenderer(new OpenGLRenderer());
+        mGLView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+        mGLView.setZOrderOnTop(true);
+
         log.log(TAG, "Created.");
     }
 

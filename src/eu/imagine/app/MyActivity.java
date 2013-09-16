@@ -16,7 +16,7 @@ public class MyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         framework = new MainInterface();
-        framework.onCreate(savedInstanceState, this,
+        framework.onCreate(this,
                 findViewById(R.id.OpenCVScreen), findViewById(R.id.OpenGL));
     }
 
@@ -27,11 +27,11 @@ public class MyActivity extends Activity {
 
     public void onPause() {
         super.onPause();
-        framework.onPause(this);
+        framework.onPause();
     }
 
     public void onDestroy() {
         super.onDestroy();
-        framework.onDestroy(this);
+        framework.onDestroy();
     }
 }
