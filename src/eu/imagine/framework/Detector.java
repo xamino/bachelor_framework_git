@@ -26,9 +26,9 @@ class Detector {
     protected boolean USE_CANNY = false;
     protected boolean DEBUG_PREP_FRAME = false;
     protected boolean DEBUG_CONTOURS = false;
-    protected boolean DEBUG_POLY = true;
-    protected boolean DEBUG_DRAW_MARKERS = true;
-    protected boolean DEBUG_DRAW_MARKER_ID = false;
+    protected boolean DEBUG_POLY = false;
+    protected boolean DEBUG_DRAW_MARKERS = false;
+    protected boolean DEBUG_DRAW_MARKER_ID = true;
     protected boolean DEBUG_DRAW_SAMPLING = false;
 
     // Important numbers, shouldn't be changed at runtime!
@@ -77,7 +77,7 @@ class Detector {
             log.pushTimer(this, "frame");
         contours.clear();
         contoursAll.clear();
-        markerCandidates.clear();
+        markerCandidates = new ArrayList<Marker>();
 
         if (USE_CANNY) {
             Imgproc.Canny(gray, out, 50, 150);
@@ -230,29 +230,35 @@ class Detector {
                         half + (j + 1) * step, texture) > 0);
             }
 
-        // Check corners & get rotation:
+        // Check corners, get rotation, and rotate pattern to correct
+        // orientation:
         int angle;
         if (!pattern[0][0] && pattern[0][3] && pattern[3][0] && pattern[3][3]) {
             angle = -90;
+            pattern = rotatePattern(3, pattern);
         } else if (pattern[0][0] && !pattern[0][3] &&
                 pattern[0][3] && pattern[3][3]) {
             angle = 0;
         } else if (pattern[0][0] && pattern[0][3] &&
                 !pattern[3][0] && pattern[3][3]) {
             angle = 180;
+            pattern = rotatePattern(2, pattern);
         } else if (pattern[0][0] && pattern[0][3] &&
                 pattern[3][0] && !pattern[3][3]) {
             angle = 90;
+            pattern = rotatePattern(1, pattern);
         } else {
+            // This happens when a black border is found but has no
+            // orientation information.
             return null;
         }
 
         // Get Hamming code corrected id:
-        // TODO: correct rotation before!
         int id = MarkerPatternHelper.getID(pattern);
 
         // For debug, we need to remember the texture, otherwise not.
         if (mainInterface.DEBUG_FRAME && (DEBUG_DRAW_MARKERS || DEBUG_POLY)) {
+            // INFO: Debugging with this HALFS the framerate!
             return new Marker(result, tempPerspective, angle, id, pattern,
                     texture);
         }
@@ -292,7 +298,23 @@ class Detector {
      * @return The rotated pattern.
      */
     private boolean[][] rotatePattern(int steps, boolean[][] pattern) {
+        if (steps < 1)
+            return pattern;
         boolean[][] rotated = new boolean[4][4];
+        if (steps == 1) {
+            for (int i = 0; i < pattern.length; i++)
+                for (int j = 0; j < pattern[i].length; j++)
+                    rotated[i][j] = pattern[j][pattern.length - 1 - i];
+        } else if (steps == 2) {
+            for (int i = 0; i < pattern.length; i++)
+                for (int j = 0; j < pattern[i].length; j++)
+                    rotated[i][j] = pattern[pattern.length - 1 - i][pattern
+                            .length - 1 - j];
+        } else {
+            for (int i = 0; i < pattern.length; i++)
+                for (int j = 0; j < pattern[i].length; j++)
+                    rotated[i][j] = pattern[pattern.length - 1 - j][i];
+        }
         return rotated;
     }
 

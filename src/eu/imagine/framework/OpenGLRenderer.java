@@ -48,7 +48,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         }
         if (!detectedMarkers.isEmpty()) {
             for (Marker marker : detectedMarkers)
-                log.debug(TAG, "Found marker "+marker.getID()+".");
+                log.debug(TAG, "Rendering marker "+marker+".");
         }
         if (MainInterface.DEBUG_FRAME_LOGGING) {
             log.debug(TAG, "OpenGL rendered frame in " + log.popTimer(this).time

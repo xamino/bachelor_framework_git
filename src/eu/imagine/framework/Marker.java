@@ -89,14 +89,7 @@ public class Marker {
     }
 
     public String toString() {
-        return "" + angle + "°|id:" + id + "\n" + pattern[0][0] + "|" + pattern[0][1
-                ] + "|" + pattern[0][2] + "|" + pattern[0][3] + "\n"
-                + pattern[1][0] + "|" + pattern[1][1
-                ] + "|" + pattern[1][2] + "|" + pattern[1][3] + "\n"
-                + pattern[2][0] + "|" + pattern[2][1
-                ] + "|" + pattern[2][2] + "|" + pattern[2][3] + "\n"
-                + pattern[3][0] + "|" + pattern[3][1
-                ] + "|" + pattern[3][2] + "|" + pattern[3][3] + "\n";
+        return "ID: "+id+" | angle: "+angle+"°";
     }
 
     protected int getID() {

@@ -25,8 +25,10 @@ public class MarkerPatternHelper {
         // Initiate empty pattern – border and 3 inner id field corners are
         // left at black.
         boolean[][] pattern = new boolean[6][6];
-        // Set top right position to white to indicate orientation
-        pattern[1][4] = true;
+        // Set id field corner positions to white to indicate orientation
+        pattern[1][1] = true;
+        pattern[4][1] = true;
+        pattern[4][4] = true;
         // Create bool representation of ID:
         boolean[] encoded = bool(ID);
         // Hamming encode it:
@@ -160,7 +162,11 @@ public class MarkerPatternHelper {
         // was successful... :P
         int index = (errorZero < 0 ? 0 : 1) + (errorOne < 0 ? 0 : 2) + (errorThree <
                 0 ? 0 : 4) + (errorSeven < 0 ? 0 : 8);
-        code[index-1] = !code[index-1];
+        // This can happen when more than one error happened:
+        if (index >= code.length)
+            log.log(TAG, "WARNING: Hamming failed to correct!");
+        else
+            code[index - 1] = !code[index - 1];
         // decode
         decoded[0] = code[2];
         decoded[1] = code[4];
