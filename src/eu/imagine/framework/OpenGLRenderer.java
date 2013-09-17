@@ -34,7 +34,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        if (MainInterface.DEBUG_LOGGING)
+        if (MainInterface.DEBUG_FRAME_LOGGING)
             log.pushTimer(this, "opengl frame");
         // Clear:
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
@@ -50,7 +50,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
             for (Marker marker : detectedMarkers)
                 log.debug(TAG, "Found marker "+marker.getID()+".");
         }
-        if (MainInterface.DEBUG_LOGGING) {
+        if (MainInterface.DEBUG_FRAME_LOGGING) {
             log.debug(TAG, "OpenGL rendered frame in " + log.popTimer(this).time
                     + "ms.");
         }

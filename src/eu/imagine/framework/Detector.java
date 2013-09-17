@@ -72,7 +72,8 @@ class Detector {
     }
 
     protected Mat detect(Mat gray, Mat rgba) {
-        if (MainInterface.DEBUG_LOGGING)
+
+        if (MainInterface.DEBUG_FRAME_LOGGING)
             log.pushTimer(this, "frame");
         contours.clear();
         contoursAll.clear();
@@ -187,7 +188,7 @@ class Detector {
             }
         }
 
-        if (MainInterface.DEBUG_LOGGING) {
+        if (MainInterface.DEBUG_FRAME_LOGGING) {
             TimerResult timer = log.popTimer(this);
             log.debug(TAG, "Detected " + markerCandidates.size() + " markers " +
                     "in " + timer.time + "ms.");
@@ -245,16 +246,10 @@ class Detector {
         } else {
             return null;
         }
-        int id = -1;
-        // TODO ID THE MARKER!
 
-        /*
-        // byte to int conversion
-        int n = 0, l = a.length;
-        for (int i = 0; i < l; ++i) {
-            n = (n << 1) + (a[i] ? 1 : 0);
-        }
-        */
+        // Get Hamming code corrected id:
+        // TODO: correct rotation before!
+        int id = MarkerPatternHelper.getID(pattern);
 
         // For debug, we need to remember the texture, otherwise not.
         if (mainInterface.DEBUG_FRAME && (DEBUG_DRAW_MARKERS || DEBUG_POLY)) {
@@ -287,6 +282,18 @@ class Detector {
                 texture.put(x, y, RED);
             return 1;
         }
+    }
+
+    /**
+     * Helper function for rotating the pattern correctly.
+     *
+     * @param steps   Set to number of clockwise steps to rotate.
+     * @param pattern The pattern to rotate.
+     * @return The rotated pattern.
+     */
+    private boolean[][] rotatePattern(int steps, boolean[][] pattern) {
+        boolean[][] rotated = new boolean[4][4];
+        return rotated;
     }
 
     /**

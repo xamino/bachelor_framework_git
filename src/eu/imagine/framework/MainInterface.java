@@ -18,7 +18,8 @@ import java.util.ArrayList;
 public class MainInterface {
 
     // Allow debug logging:
-    protected static boolean DEBUG_LOGGING = false;
+    protected static boolean DEBUG_LOGGING = true;
+    protected static boolean DEBUG_FRAME_LOGGING = false;
     protected boolean RUN_OPENCV = true;
     protected boolean RUN_RENDERER = true;
     protected boolean DEBUG_FRAME = false;
