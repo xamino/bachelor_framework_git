@@ -10,7 +10,7 @@ import org.opencv.core.MatOfPoint2f;
  * Date: 9/7/13
  * Time: 2:08 PM
  */
-class Marker {
+public class Marker {
 
     /**
      * Stores bool representation of pattern
@@ -37,12 +37,13 @@ class Marker {
 
     /**
      * Constructor. COPIES all values!
+     *
      * @param originalCorners
      * @param markerPerspective
      */
     // TODO: Consider which values will really be needed on the OpenGL side
     // and remove all others, as they only decrease speed!
-    protected Marker(MatOfPoint2f originalCorners, Mat markerPerspective,
+    public Marker(MatOfPoint2f originalCorners, Mat markerPerspective,
                   int angle, int id, boolean[][] pattern, Mat texture) {
         this.id = id;
         this.angle = angle;
@@ -54,11 +55,33 @@ class Marker {
     }
 
     /**
+     * Faster constructor – WARNING, NULL fields possible as some are unused
+     * here!
+     *
+     * @param markerPerspective
+     * @param angle
+     * @param id
+     */
+    public Marker(Mat markerPerspective,
+                  int angle, int id) {
+        this.id = id;
+        this.angle = angle;
+        this.markerPerspective = markerPerspective.clone();
+        this.pattern = null;
+        this.texture = null;
+        this.originalCorners = null;
+    }
+
+    /**
      * Function for easy access to MatOfPoint representation of corner points.
+     *
      * @return
      */
     protected MatOfPoint getMOPCorners() {
-        return new MatOfPoint(originalCorners.toArray());
+        if (originalCorners == null)
+            return null;
+        else
+            return new MatOfPoint(originalCorners.toArray());
     }
 
     protected boolean[][] getPattern() {
@@ -66,13 +89,17 @@ class Marker {
     }
 
     public String toString() {
-        return ""+angle+"°|id:"+id+"\n"+pattern[0][0]+"|"+pattern[0][1
-                ]+"|"+pattern[0][2]+"|"+pattern[0][3]+"\n"
-                +pattern[1][0]+"|"+pattern[1][1
-                ]+"|"+pattern[1][2]+"|"+pattern[1][3]+"\n"
-                +pattern[2][0]+"|"+pattern[2][1
-                ]+"|"+pattern[2][2]+"|"+pattern[2][3]+"\n"
-                +pattern[3][0]+"|"+pattern[3][1
-                ]+"|"+pattern[3][2]+"|"+pattern[3][3]+"\n";
+        return "" + angle + "°|id:" + id + "\n" + pattern[0][0] + "|" + pattern[0][1
+                ] + "|" + pattern[0][2] + "|" + pattern[0][3] + "\n"
+                + pattern[1][0] + "|" + pattern[1][1
+                ] + "|" + pattern[1][2] + "|" + pattern[1][3] + "\n"
+                + pattern[2][0] + "|" + pattern[2][1
+                ] + "|" + pattern[2][2] + "|" + pattern[2][3] + "\n"
+                + pattern[3][0] + "|" + pattern[3][1
+                ] + "|" + pattern[3][2] + "|" + pattern[3][3] + "\n";
+    }
+
+    protected int getID() {
+        return id;
     }
 }

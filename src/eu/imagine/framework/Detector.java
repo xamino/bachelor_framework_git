@@ -31,17 +31,18 @@ class Detector {
     protected boolean DEBUG_DRAW_MARKER_ID = false;
     protected boolean DEBUG_DRAW_SAMPLING = false;
 
-    // Important numbers
+    // Important numbers, shouldn't be changed at runtime!
     private final int MARKER_GRID = 6;
     private final int MARKER_SQUARE = 3;
     private final int MARKER_SIZE = MARKER_GRID * MARKER_SQUARE;
     private final int RENDER_SCALE = 5;
     private final int SAMPLING_ERRORS = 4;
-    private int step = MARKER_SIZE / MARKER_GRID;
-    private int half = step / 2;
+    private final int step = MARKER_SIZE / MARKER_GRID;
+    private final int half = step / 2;
 
     // Important reused vars
-    private Mat out, compositeFrameOut, tempPerspective;
+    private Mat out;
+    private Mat compositeFrameOut;
     private ArrayList<MatOfPoint> contours, contoursAll;
     private ArrayList<Marker> markerCandidates;
     private MatOfPoint2f result, standardMarker;
@@ -66,6 +67,8 @@ class Detector {
         this.standardMarker.fromArray(new Point(0, MARKER_SIZE),
                 new Point(0, 0),
                 new Point(MARKER_SIZE, 0), new Point(MARKER_SIZE, MARKER_SIZE));
+        // Correctly set flags
+        this.updateFlags();
     }
 
     protected Mat detect(Mat gray, Mat rgba) {
@@ -114,7 +117,7 @@ class Detector {
                 continue;
             }
             // Calculate perspective transform
-            tempPerspective = Imgproc.getPerspectiveTransform(result,
+            Mat tempPerspective = Imgproc.getPerspectiveTransform(result,
                     standardMarker);
             // Apply to get marker texture
             Imgproc.warpPerspective(rgba, out, tempPerspective,
@@ -139,6 +142,11 @@ class Detector {
                 int count = 0;
                 for (Marker mark : markerCandidates) {
                     Mat tempText = mark.texture;
+                    // Might, but shouldn't be null
+                    if (tempText == null) {
+                        log.debug(TAG, "DEBUG_DRAW_MARKERS: Texture NULL!");
+                        continue;
+                    }
                     int xoffset = RENDER_SCALE * MARKER_SIZE * count;
                     count++;
                     for (int i = 0; i < RENDER_SCALE * MARKER_SIZE; i++)
@@ -153,6 +161,11 @@ class Detector {
                 int count = 0;
                 for (Marker mark : markerCandidates) {
                     boolean[][] tempBool = mark.getPattern();
+                    // Might, but shouldn't happen
+                    if (tempBool == null) {
+                        log.debug(TAG, "DEBUG_DRAW_MARKER_ID: Pattern NULL!");
+                        continue;
+                    }
                     int yoffset = RENDER_SCALE * MARKER_SIZE *
                             (DEBUG_DRAW_MARKERS ? 1 : 0);
                     int xoffset = RENDER_SCALE * MARKER_SIZE * count;
@@ -197,19 +210,19 @@ class Detector {
         int errorAllowance = 0;
         // Check border:
         for (int i = 1; i < MARKER_GRID - 1; i++) {
-            if (testSample(half + i * step, half, texture) > 0)
+            if (testSample(half + (i * step), half, texture) > 0)
                 errorAllowance++;
-            if (testSample(half, half + i * step, texture) > 0)
+            if (testSample(half, half + (i * step), texture) > 0)
                 errorAllowance++;
-            if (testSample(half + i * step, MARKER_SIZE - 1 - half, texture) > 0)
+            if (testSample(half + (i * step), MARKER_SIZE - 1 - half, texture) > 0)
                 errorAllowance++;
-            if (testSample(MARKER_SIZE - 1 - half, half + i * step, texture) > 0)
+            if (testSample(MARKER_SIZE - 1 - half, half + (i * step), texture) > 0)
                 errorAllowance++;
         }
 
         if (errorAllowance > SAMPLING_ERRORS)
             return null;
-        // Now ID it:
+        // Now read pattern:
         for (int i = 0; i < 4; i++)
             for (int j = 0; j < 4; j++) {
                 pattern[i][j] = (testSample(half + (i + 1) * step,
@@ -234,8 +247,22 @@ class Detector {
         }
         int id = -1;
         // TODO ID THE MARKER!
-        return new Marker(result, tempPerspective, angle, id, pattern,
-                texture);
+
+        /*
+        // byte to int conversion
+        int n = 0, l = a.length;
+        for (int i = 0; i < l; ++i) {
+            n = (n << 1) + (a[i] ? 1 : 0);
+        }
+        */
+
+        // For debug, we need to remember the texture, otherwise not.
+        if (mainInterface.DEBUG_FRAME && (DEBUG_DRAW_MARKERS || DEBUG_POLY)) {
+            return new Marker(result, tempPerspective, angle, id, pattern,
+                    texture);
+        }
+        // Normal, faster return:
+        return new Marker(tempPerspective, angle, id);
     }
 
     /**
@@ -260,5 +287,20 @@ class Detector {
                 texture.put(x, y, RED);
             return 1;
         }
+    }
+
+    /**
+     * Method sets flags corresponding to whether they will have any effect.
+     * Basically, if DEBUG_FRAME from MainInterface is not set to true,
+     * all the flags will automatically be set to false.
+     */
+    protected void updateFlags() {
+        USE_CANNY = USE_CANNY && mainInterface.DEBUG_FRAME;
+        DEBUG_PREP_FRAME = DEBUG_PREP_FRAME && mainInterface.DEBUG_FRAME;
+        DEBUG_CONTOURS = DEBUG_CONTOURS && mainInterface.DEBUG_FRAME;
+        DEBUG_POLY = DEBUG_POLY && mainInterface.DEBUG_FRAME;
+        DEBUG_DRAW_MARKERS = DEBUG_DRAW_MARKERS && mainInterface.DEBUG_FRAME;
+        DEBUG_DRAW_MARKER_ID = DEBUG_DRAW_MARKER_ID && mainInterface.DEBUG_FRAME;
+        DEBUG_DRAW_SAMPLING = DEBUG_DRAW_SAMPLING && mainInterface.DEBUG_FRAME;
     }
 }

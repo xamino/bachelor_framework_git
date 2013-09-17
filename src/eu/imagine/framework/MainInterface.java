@@ -8,7 +8,6 @@ import android.widget.FrameLayout;
 import org.opencv.android.JavaCameraView;
 
 import java.util.ArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +18,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class MainInterface {
 
     // Allow debug logging:
-    protected static boolean DEBUG_LOGGING = true;
+    protected static boolean DEBUG_LOGGING = false;
     protected boolean RUN_OPENCV = true;
     protected boolean RUN_RENDERER = true;
     protected boolean DEBUG_FRAME = false;
@@ -33,9 +32,13 @@ public class MainInterface {
     private ViewGroup groupView;
 
     // Store markers per frame:
-    private LinkedBlockingQueue<ArrayList<Marker>> detectedMarkers =
-            new LinkedBlockingQueue<ArrayList<Marker>>(1);
+    private ArrayList<Marker> detectedMarkers;
     private boolean updatedData = false;
+
+    // Store Homography listeners:
+    private ArrayList<HomographyListener> listeners;
+    // TODO: IMPLEMENT
+    private boolean NO_RENDER = false;
 
     public MainInterface(Activity mainActivity, ViewGroup groupView) {
         this.log = Messenger.getInstance();
@@ -45,6 +48,7 @@ public class MainInterface {
         if (groupView == null)
             log.log(TAG, "Framework will crash, groupView is NULL!");
         this.groupView = groupView;
+        listeners = new ArrayList<HomographyListener>();
     }
 
     public void onCreate() {
@@ -97,6 +101,14 @@ public class MainInterface {
         log.log(TAG, "Stopping.");
     }
 
+    public void registerListener(HomographyListener homographyListener) {
+        this.listeners.add(homographyListener);
+    }
+
+    public void removeListener(HomographyListener homographyListener) {
+        this.listeners.remove(homographyListener);
+    }
+
     /**
      * Method that receives candidate markers. Here, they are filtered for
      * the markers we want and partnered with the entities we'll show.
@@ -104,12 +116,9 @@ public class MainInterface {
      * @param markerCandidates The list containing all detected markers.
      */
     protected synchronized void updateList(ArrayList<Marker> markerCandidates) {
-        try {
-            detectedMarkers.put(markerCandidates);
-            updatedData = true;
-        } catch (InterruptedException e) {
-            log.log(TAG, "Error updateing marker list!");
-        }
+        detectedMarkers = markerCandidates;
+        updatedData = true;
+        // TODO: IMPLEMENT HOMOGRAPHY LISTENERS!
     }
 
     /**
@@ -131,13 +140,7 @@ public class MainInterface {
     // TODO: change to entity list, not simply all marker (meaning add
     // filtering)
     protected synchronized ArrayList<Marker> getList() {
-        try {
-            updatedData = false;
-            return detectedMarkers.take();
-        } catch (InterruptedException e) {
-            log.log(TAG, "Error passing marker list to renderer!");
-            updatedData = false;
-            return null;
-        }
+        updatedData = false;
+        return detectedMarkers;
     }
 }
