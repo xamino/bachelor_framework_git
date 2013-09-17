@@ -1,10 +1,8 @@
-package eu.imagine.framework.opencv;
+package eu.imagine.framework;
 
 import android.app.Activity;
 import android.view.SurfaceView;
 import android.view.View;
-import eu.imagine.framework.MainInterface;
-import eu.imagine.framework.messenger.Messenger;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
@@ -19,23 +17,25 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Date: 9/15/13
  * Time: 2:05 PM
  */
-public class OpenCVInterface implements CameraBridgeViewBase
+class OpenCVInterface implements CameraBridgeViewBase
         .CvCameraViewListener2 {
 
+    private MainInterface mainInterface;
     // OpenCV Android stuff:
     private CameraBridgeViewBase mOpenCvCameraView;
 
     // Vars that we need:
     private Messenger log;
     private final String TAG = "OpenCVInterface";
-    public static LinkedBlockingQueue<TransportContainer> workerFeeder;
+    protected LinkedBlockingQueue<TransportContainer> workerFeeder;
     private Detector det;
     private OpenCVWorker[] workers;
     private final int PARALLEL_COUNT = 4;
 
     private BaseLoaderCallback mLoaderCallback;
 
-    public OpenCVInterface(Activity mainActivity) {
+    protected OpenCVInterface(MainInterface mainInterface, Activity mainActivity) {
+        this.mainInterface = mainInterface;
         mLoaderCallback = new BaseLoaderCallback(mainActivity) {
             @Override
             public void onManagerConnected(int status) {
@@ -55,13 +55,14 @@ public class OpenCVInterface implements CameraBridgeViewBase
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-        det = new Detector();
+        det = new Detector(mainInterface);
         workerFeeder = new LinkedBlockingQueue<TransportContainer>(1);
 
         workers = new OpenCVWorker[PARALLEL_COUNT];
 
         for (int i = 0; i < workers.length; i++) {
-            workers[i] = new OpenCVWorker("OpenCV Worker " + i);
+            workers[i] = new OpenCVWorker(this, mainInterface,
+                    "OpenCV Worker " + i);
             workers[i].start();
         }
     }
@@ -82,7 +83,7 @@ public class OpenCVInterface implements CameraBridgeViewBase
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         // If debug, do everything in line:
-        if (MainInterface.DEBUG_FRAME) {
+        if (mainInterface.DEBUG_FRAME) {
             return det.detect(inputFrame.gray(), inputFrame.rgba());
         }
         // Else put the task on multiple threads:
@@ -98,7 +99,7 @@ public class OpenCVInterface implements CameraBridgeViewBase
         }
     }
 
-    public void onCreate(View cameraView) {
+    protected void onCreate(View cameraView) {
         this.log = Messenger.getInstance();
         mOpenCvCameraView = (CameraBridgeViewBase) cameraView;
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
@@ -106,18 +107,27 @@ public class OpenCVInterface implements CameraBridgeViewBase
         log.log(TAG, "Created.");
     }
 
-    public void onResume(Activity mainActivity) {
+    protected void onResume(Activity mainActivity) {
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, mainActivity,
                 mLoaderCallback);
     }
 
-    public void onPause() {
+    protected void onPause() {
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
     }
 
-    public void onDestroy() {
+    protected void onDestroy() {
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
+    }
+
+    protected TransportContainer getTransport() {
+        try {
+            return workerFeeder.take();
+        } catch (InterruptedException e) {
+            log.log(TAG, "Error taking frame for worker!");
+            return null;
+        }
     }
 }

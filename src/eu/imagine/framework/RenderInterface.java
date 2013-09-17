@@ -1,8 +1,7 @@
-package eu.imagine.framework.renderer;
+package eu.imagine.framework;
 
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
-import eu.imagine.framework.messenger.Messenger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,32 +9,34 @@ import eu.imagine.framework.messenger.Messenger;
  * Date: 9/15/13
  * Time: 3:05 PM
  */
-public class RenderInterface {
+class RenderInterface {
 
+    private final MainInterface mainInterface;
     private Messenger log;
     private final String TAG = "RenderInterface";
     private GLSurfaceView mGLView;
 
-    public RenderInterface() {
+    protected RenderInterface(MainInterface mainInterface) {
         log = Messenger.getInstance();
+        this.mainInterface = mainInterface;
     }
 
-    public void onCreate(GLSurfaceView renderView) {
+    protected void onCreate(GLSurfaceView renderView) {
         mGLView = renderView;
         mGLView.setEGLContextClientVersion(2);
         mGLView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        mGLView.setRenderer(new OpenGLRenderer());
+        mGLView.setRenderer(new OpenGLRenderer(mainInterface));
         mGLView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
         mGLView.setZOrderMediaOverlay(true);
 
         log.log(TAG, "Created.");
     }
 
-    public void onResume() {
+    protected void onResume() {
         mGLView.onResume();
     }
 
-    public void onPause() {
+    protected void onPause() {
         mGLView.onPause();
     }
 }

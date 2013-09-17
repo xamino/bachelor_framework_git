@@ -1,4 +1,4 @@
-package eu.imagine.framework.opencv;
+package eu.imagine.framework;
 
 import org.opencv.core.Mat;
 
@@ -8,11 +8,11 @@ import org.opencv.core.Mat;
  * Date: 9/9/13
  * Time: 4:37 PM
  */
-public class TransportContainer {
+class TransportContainer {
 
-    public Mat gray, rgba;
+    protected Mat gray, rgba;
 
-    public TransportContainer(Mat gray, Mat rgba) {
+    protected TransportContainer(Mat gray, Mat rgba) {
         this.gray = gray;
         this.rgba = rgba;
     }

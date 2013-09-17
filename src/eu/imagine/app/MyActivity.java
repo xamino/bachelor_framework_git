@@ -16,13 +16,13 @@ public class MyActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        framework = new MainInterface();
-        framework.onCreate(this, (ViewGroup) findViewById(R.id.group));
+        framework = new MainInterface(this, (ViewGroup) findViewById(R.id.group));
+        framework.onCreate();
     }
 
     public void onResume() {
         super.onResume();
-        framework.onResume(this);
+        framework.onResume();
     }
 
     public void onPause() {

@@ -1,7 +1,6 @@
-package eu.imagine.framework.messenger;
+package eu.imagine.framework;
 
 import android.util.Log;
-import eu.imagine.framework.MainInterface;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,7 +16,7 @@ import java.util.Stack;
  * This class implements a thread safe timer for multiple objects and
  * standardized logging functions for the framework.
  */
-public class Messenger {
+class Messenger {
 
     /**
      * Variable that stores singleton instance.
@@ -53,7 +52,7 @@ public class Messenger {
      * @param tag     The tag used when logging after the internal tag.
      * @param content The content of the message to log.
      */
-    public synchronized void log(final String tag, final String content) {
+    protected synchronized void log(final String tag, final String content) {
         Log.i("Messenger|" + tag, content);
     }
 
@@ -64,7 +63,7 @@ public class Messenger {
      * @param tag     The tag used after the internal tag.
      * @param content The content of the message to log.
      */
-    public synchronized void debug(final String tag, final String content) {
+    protected synchronized void debug(final String tag, final String content) {
         if (MainInterface.DEBUG_LOGGING)
             Log.d("Messenger|" + tag, content);
     }
@@ -75,7 +74,7 @@ public class Messenger {
      * @param object Object reference to allow the correct stack to be used.
      * @param label  The label to remember for the timer.
      */
-    public synchronized void pushTimer(Object object, final String label) {
+    protected synchronized void pushTimer(Object object, final String label) {
         // Make sure that we don't keep too many objects:
         if (timers.size() > 32) {
             log("Messenger", "WARNING: Excessive amount of stacks required " +
@@ -110,7 +109,7 @@ public class Messenger {
      *         were done), an object with time "-1" and label "EMPTY STACK" are
      *         returned.
      */
-    public synchronized TimerResult popTimer(Object object) {
+    protected synchronized TimerResult popTimer(Object object) {
         if (timers.containsKey(object)) {
             Stack<TimerResult> stack = timers.get(object);
             if (stack.isEmpty())

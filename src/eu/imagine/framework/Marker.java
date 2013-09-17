@@ -1,4 +1,4 @@
-package eu.imagine.framework.opencv;
+package eu.imagine.framework;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -10,13 +10,13 @@ import org.opencv.core.MatOfPoint2f;
  * Date: 9/7/13
  * Time: 2:08 PM
  */
-public class Marker {
+class Marker {
 
     /**
      * Stores bool representation of pattern
      */
     private boolean[][] pattern;
-    public Mat texture;
+    protected Mat texture;
     /**
      * Contains angle.
      */
@@ -42,7 +42,7 @@ public class Marker {
      */
     // TODO: Consider which values will really be needed on the OpenGL side
     // and remove all others, as they only decrease speed!
-    public Marker(MatOfPoint2f originalCorners, Mat markerPerspective,
+    protected Marker(MatOfPoint2f originalCorners, Mat markerPerspective,
                   int angle, int id, boolean[][] pattern, Mat texture) {
         this.id = id;
         this.angle = angle;
@@ -57,11 +57,11 @@ public class Marker {
      * Function for easy access to MatOfPoint representation of corner points.
      * @return
      */
-    public MatOfPoint getMOPCorners() {
+    protected MatOfPoint getMOPCorners() {
         return new MatOfPoint(originalCorners.toArray());
     }
 
-    public boolean[][] getPattern() {
+    protected boolean[][] getPattern() {
         return this.pattern;
     }
 

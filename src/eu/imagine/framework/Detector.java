@@ -1,8 +1,5 @@
-package eu.imagine.framework.opencv;
+package eu.imagine.framework;
 
-import eu.imagine.framework.MainInterface;
-import eu.imagine.framework.messenger.Messenger;
-import eu.imagine.framework.messenger.TimerResult;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
@@ -19,19 +16,20 @@ import java.util.ArrayList;
  * Class encapsulates the main work method, allowing a simpler view from
  * outside.
  */
-public class Detector {
+class Detector {
 
+    private final MainInterface mainInterface;
     private Messenger log;
     private final String TAG = "Detector";
 
     // FLAGS (compositeFrameOut order!)
-    public boolean USE_CANNY = false;
-    public boolean DEBUG_PREP_FRAME = false;
-    public boolean DEBUG_CONTOURS = false;
-    public boolean DEBUG_POLY = true;
-    public boolean DEBUG_DRAW_MARKERS = true;
-    public boolean DEBUG_DRAW_MARKER_ID = false;
-    public boolean DEBUG_DRAW_SAMPLING = false;
+    protected boolean USE_CANNY = false;
+    protected boolean DEBUG_PREP_FRAME = false;
+    protected boolean DEBUG_CONTOURS = false;
+    protected boolean DEBUG_POLY = true;
+    protected boolean DEBUG_DRAW_MARKERS = true;
+    protected boolean DEBUG_DRAW_MARKER_ID = false;
+    protected boolean DEBUG_DRAW_SAMPLING = false;
 
     // Important numbers
     private final int MARKER_GRID = 6;
@@ -54,22 +52,23 @@ public class Detector {
     private final double[] WHITE = new double[]{255, 255, 255, 0};
     private final double[] BLACK = new double[]{0, 0, 0, 0};
 
-    public Detector() {
-        log = Messenger.getInstance();
-        out = new Mat();
-        compositeFrameOut = new Mat();
-        contours = new ArrayList<MatOfPoint>();
-        contoursAll = new ArrayList<MatOfPoint>();
-        markerCandidates = new ArrayList<Marker>();
-        result = new MatOfPoint2f();
+    protected Detector(MainInterface mainInterface) {
+        this.log = Messenger.getInstance();
+        this.mainInterface = mainInterface;
+        this.out = new Mat();
+        this.compositeFrameOut = new Mat();
+        this.contours = new ArrayList<MatOfPoint>();
+        this.contoursAll = new ArrayList<MatOfPoint>();
+        this.markerCandidates = new ArrayList<Marker>();
+        this.result = new MatOfPoint2f();
         // Prepare standard marker:
-        standardMarker = new MatOfPoint2f();
-        standardMarker.fromArray(new Point(0, MARKER_SIZE),
+        this.standardMarker = new MatOfPoint2f();
+        this.standardMarker.fromArray(new Point(0, MARKER_SIZE),
                 new Point(0, 0),
                 new Point(MARKER_SIZE, 0), new Point(MARKER_SIZE, MARKER_SIZE));
     }
 
-    public Mat detect(Mat gray, Mat rgba) {
+    protected Mat detect(Mat gray, Mat rgba) {
         if (MainInterface.DEBUG_LOGGING)
             log.pushTimer(this, "frame");
         contours.clear();
@@ -181,15 +180,10 @@ public class Detector {
                     "in " + timer.time + "ms.");
         }
 
-        /*
-        try {
-            MainInterface.detectedMarkers.put(markerCandidates);
-        } catch (InterruptedException e) {
-            log.log(TAG, "Error placing markers in queue!");
-            e.printStackTrace();
-        }
-        */
+        // Pass detected markers up
+        mainInterface.updateList(markerCandidates);
 
+        // Return frame (only used in frame debugging mode)
         return compositeFrameOut;
     }
 
