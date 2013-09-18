@@ -32,10 +32,11 @@ public class MainInterface {
     private RenderInterface render;
     private Activity mainActivity;
     private ViewGroup groupView;
-    private Object synLock = new Object();
+    private final Object synLock = new Object();
 
     // Store markers per frame:
-    private ArrayList<Marker> detectedMarkers;
+    private ArrayList<Entity> allTrackables;
+    private ArrayList<Trackable> detectedTrackables;
     private boolean updatedData = false;
 
     // Store Homography listeners:
@@ -49,7 +50,9 @@ public class MainInterface {
         if (groupView == null)
             log.log(TAG, "Framework will crash, groupView is NULL!");
         this.groupView = groupView;
-        listeners = new ArrayList<HomographyListener>();
+        this.listeners = new ArrayList<HomographyListener>();
+        this.allTrackables = new ArrayList<Entity>();
+        this.detectedTrackables = new ArrayList<Trackable>();
     }
 
     public void onCreate() {
@@ -102,12 +105,47 @@ public class MainInterface {
         log.log(TAG, "Stopping.");
     }
 
+    /**
+     * Add a homogrpahy listener. NOTE: Will only be notified if the
+     * ONLY_HOMOGRAPHY flag has been set!
+     *
+     * @param homographyListener The object to register.
+     */
+    @SuppressWarnings("UnusedDeclaration")
     public void registerListener(HomographyListener homographyListener) {
         this.listeners.add(homographyListener);
     }
 
+    /**
+     * Remove a homography listener.
+     *
+     * @param homographyListener The object to remove.
+     */
+    @SuppressWarnings("UnusedDeclaration")
     public void removeListener(HomographyListener homographyListener) {
         this.listeners.remove(homographyListener);
+    }
+
+    /**
+     * Add an entity to be detected and rendered. NOTE: References are used,
+     * meaning that changes outside of the framework WILL have effects here
+     * too!
+     *
+     * @param entity The entity to register.
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public void registerEntity(Entity entity) {
+        this.allTrackables.add(entity);
+    }
+
+    /**
+     * Remove an entity from the list.
+     *
+     * @param entity Entity to remove.
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public void removeEntity(Entity entity) {
+        this.allTrackables.remove(entity);
     }
 
     /**
@@ -115,6 +153,7 @@ public class MainInterface {
      *
      * @param value The flag to set true.
      */
+    @SuppressWarnings("UnusedDeclaration")
     public void setDebugFlag(Flags value) {
         setFlag(value, true);
     }
@@ -124,6 +163,7 @@ public class MainInterface {
      *
      * @param value The flag to set to false.
      */
+    @SuppressWarnings("UnusedDeclaration")
     public void removeDebugFlag(Flags value) {
         setFlag(value, false);
     }
@@ -134,6 +174,7 @@ public class MainInterface {
      * @param value The flag to set.
      * @param bool  The value to set that flag at.
      */
+    @SuppressWarnings("UnusedDeclaration")
     private void setFlag(Flags value, boolean bool) {
         switch (value) {
             case ONLY_HOMOGRAPHY:
@@ -190,11 +231,37 @@ public class MainInterface {
      */
     protected void updateList(ArrayList<Marker> markerCandidates) {
         synchronized (synLock) {
-            detectedMarkers = markerCandidates;
             updatedData = true;
             if (ONLY_HOMOGRAPHY) {
                 for (HomographyListener listener : listeners) {
-                    listener.receiveHomographies(detectedMarkers);
+                    listener.receiveHomographies(markerCandidates);
+                }
+            }
+            // Else case means we'll be rendering it,
+            // so we filter the detected markers against the entity pairs we
+            // want:
+            else {
+                // Remove old list:
+                detectedTrackables.clear();
+                // Now go through all trackables:
+                for (Entity tracking : allTrackables) {
+                    // Check if we want to render it:
+                    if (!tracking.getVisibility())
+                        continue;
+                    // Now add it to the renderTrackable list if marker found:
+                    Marker toRemove = null;
+                    for (Marker mark : markerCandidates)
+                        if (mark.getID() == tracking.getID()) {
+                            // Add to rendering:
+                            detectedTrackables.add(new Trackable(mark.getID()
+                                    , tracking.getObject(),
+                                    mark.getPerspective()));
+                            toRemove = mark;
+                            break;
+                        }
+                    // Remove marker for performance reasons
+                    if (toRemove != null)
+                        markerCandidates.remove(toRemove);
                 }
             }
         }
@@ -219,10 +286,10 @@ public class MainInterface {
      *
      * @return List containing all markers for now.
      */
-    protected ArrayList<Marker> getList() {
+    protected ArrayList<Trackable> getList() {
         synchronized (synLock) {
             updatedData = false;
-            return detectedMarkers;
+            return detectedTrackables;
         }
     }
 }

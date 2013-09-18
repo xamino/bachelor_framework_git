@@ -95,4 +95,8 @@ public class Marker {
     protected int getID() {
         return id;
     }
+
+    public Mat getPerspective() {
+        return markerPerspective;
+    }
 }

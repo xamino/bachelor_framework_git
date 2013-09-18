@@ -19,12 +19,12 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
     private Messenger log;
     private final String TAG = "OpenGLRenderer";
 
-    private ArrayList<Marker> detectedMarkers;
+    private ArrayList<Trackable> toRender;
 
     protected OpenGLRenderer(MainInterface mainInterface) {
         this.log = Messenger.getInstance();
         this.mainInterface = mainInterface;
-        this.detectedMarkers = new ArrayList<Marker>();
+        this.toRender = new ArrayList<Trackable>();
     }
 
     @Override
@@ -39,16 +39,16 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         // Clear:
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         // If new markerlist, get:
-        if(mainInterface.getListUpdateStatus()) {
-            this.detectedMarkers = mainInterface.getList();
-            if (detectedMarkers == null) {
+        if (mainInterface.getListUpdateStatus()) {
+            this.toRender = mainInterface.getList();
+            if (toRender == null) {
                 log.log(TAG, "Error getting list!");
-                detectedMarkers = new ArrayList<Marker>();
+                toRender = new ArrayList<Trackable>();
             }
         }
-        if (!detectedMarkers.isEmpty()) {
-            for (Marker marker : detectedMarkers)
-                log.debug(TAG, "Rendering marker "+marker+".");
+        if (!toRender.isEmpty()) {
+            for (Trackable trackable : toRender)
+                log.debug(TAG, "Rendering marker " + trackable.toString() + ".");
         }
         if (MainInterface.DEBUG_FRAME_LOGGING) {
             log.debug(TAG, "OpenGL rendered frame in " + log.popTimer(this).time
