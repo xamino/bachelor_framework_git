@@ -6,8 +6,8 @@ package eu.imagine.framework;
  * Date: 9/18/13
  * Time: 2:40 PM
  */
-public interface Entity {
+public interface Entity extends OpenGLDraw{
     public int getID();
-    public String getObject();
+    public OpenGLDraw getDraw();
     public boolean getVisibility();
 }

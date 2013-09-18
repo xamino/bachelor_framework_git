@@ -253,9 +253,8 @@ public class MainInterface {
                     for (Marker mark : markerCandidates)
                         if (mark.getID() == tracking.getID()) {
                             // Add to rendering:
-                            detectedTrackables.add(new Trackable(mark.getID()
-                                    , tracking.getObject(),
-                                    mark.getPerspective()));
+                            detectedTrackables.add(new Trackable(mark.getID(),
+                                    mark.getPerspective(), tracking.getDraw()));
                             toRemove = mark;
                             break;
                         }

@@ -8,17 +8,21 @@ import org.opencv.core.Mat;
 class Trackable {
 
     final int ID;
-    final String OBJECT;
     final Mat PERSPECTIVE;
+    final OpenGLDraw DRAW;
 
-    public Trackable(final int ID, final String OBJECT,
-                     final Mat PERSPECTIVE) {
+    public Trackable(final int ID, final Mat PERSPECTIVE,
+                     final OpenGLDraw DRAW) {
         this.ID = ID;
-        this.OBJECT = OBJECT;
         this.PERSPECTIVE = PERSPECTIVE;
+        this.DRAW = DRAW;
     }
 
     public String toString() {
-        return "Trackable | ID:" + ID + " | " + OBJECT;
+        return "Trackable | ID:" + ID;
+    }
+
+    public void draw() {
+        DRAW.draw();
     }
 }

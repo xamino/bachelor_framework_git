@@ -29,7 +29,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        GLES20.glClearColor(0.5f, 0.5f, 0.5f, 0.5f);
+        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     @Override
@@ -46,9 +46,12 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
                 toRender = new ArrayList<Trackable>();
             }
         }
+        // ------------------------ RENDER ------------------------
         if (!toRender.isEmpty()) {
-            for (Trackable trackable : toRender)
-                log.debug(TAG, "Rendering marker " + trackable.toString() + ".");
+            for (Trackable trackable : toRender) {
+                log.debug(TAG, "Rendering " + trackable.toString() + ".");
+                trackable.draw();
+            }
         }
         if (MainInterface.DEBUG_FRAME_LOGGING) {
             log.debug(TAG, "OpenGL rendered frame in " + log.popTimer(this).time
