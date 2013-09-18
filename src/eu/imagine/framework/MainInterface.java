@@ -32,6 +32,7 @@ public class MainInterface {
     private RenderInterface render;
     private Activity mainActivity;
     private ViewGroup groupView;
+    private Object synLock = new Object();
 
     // Store markers per frame:
     private ArrayList<Marker> detectedMarkers;
@@ -187,12 +188,14 @@ public class MainInterface {
      *
      * @param markerCandidates The list containing all detected markers.
      */
-    protected synchronized void updateList(ArrayList<Marker> markerCandidates) {
-        detectedMarkers = markerCandidates;
-        updatedData = true;
-        if (ONLY_HOMOGRAPHY) {
-            for (HomographyListener listener : listeners) {
-                listener.receiveHomographies(detectedMarkers);
+    protected void updateList(ArrayList<Marker> markerCandidates) {
+        synchronized (synLock) {
+            detectedMarkers = markerCandidates;
+            updatedData = true;
+            if (ONLY_HOMOGRAPHY) {
+                for (HomographyListener listener : listeners) {
+                    listener.receiveHomographies(detectedMarkers);
+                }
             }
         }
     }
@@ -203,8 +206,11 @@ public class MainInterface {
      *
      * @return True when a new list has been posted, false else.
      */
-    protected synchronized boolean getListUpdateStatus() {
-        return updatedData;
+
+    protected boolean getListUpdateStatus() {
+        synchronized (synLock) {
+            return updatedData;
+        }
     }
 
     /**
@@ -213,10 +219,10 @@ public class MainInterface {
      *
      * @return List containing all markers for now.
      */
-    // TODO: change to entity list, not simply all marker (meaning add
-    // filtering)
-    protected synchronized ArrayList<Marker> getList() {
-        updatedData = false;
-        return detectedMarkers;
+    protected ArrayList<Marker> getList() {
+        synchronized (synLock) {
+            updatedData = false;
+            return detectedMarkers;
+        }
     }
 }
