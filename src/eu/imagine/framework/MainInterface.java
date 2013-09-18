@@ -289,7 +289,7 @@ public class MainInterface {
     protected ArrayList<Trackable> getList() {
         synchronized (synLock) {
             updatedData = false;
-            return detectedTrackables;
+            return (ArrayList<Trackable>) detectedTrackables.clone();
         }
     }
 }

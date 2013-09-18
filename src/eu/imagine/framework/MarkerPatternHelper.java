@@ -162,11 +162,12 @@ public class MarkerPatternHelper {
         // was successful... :P
         int index = (errorZero < 0 ? 0 : 1) + (errorOne < 0 ? 0 : 2) + (errorThree <
                 0 ? 0 : 4) + (errorSeven < 0 ? 0 : 8);
+        index--;
         // This can happen when more than one error happened:
         if (index >= code.length)
-            log.log(TAG, "WARNING: Hamming failed to correct!");
+            log.debug(TAG, "WARNING: Hamming failed to correct!");
         else
-            code[index - 1] = !code[index - 1];
+            code[index] = !code[index];
         // decode
         decoded[0] = code[2];
         decoded[1] = code[4];
