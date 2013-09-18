@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import eu.imagine.R;
-import eu.imagine.framework.Flags;
 import eu.imagine.framework.MainInterface;
 
 public class MyActivity extends Activity {
@@ -21,7 +20,7 @@ public class MyActivity extends Activity {
         // the results to show.
         framework = new MainInterface(this, (ViewGroup) findViewById(R.id.group));
         // Set some debugging flags:
-        framework.setDebugFlag(Flags.DEBUG_LOGGING);
+        // framework.setDebugFlag(Flags.DEBUG_LOGGING);
         // framework.setDebugFlag(Flags.DEBUG_FRAME_LOGGING);
         // Add some test entities:
         Tracking one = new Tracking(152);

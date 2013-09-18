@@ -7,5 +7,5 @@ package eu.imagine.framework;
  * Time: 3:29 PM
  */
 public interface OpenGLDraw {
-    public void draw();
+    public void draw(float[] mMVPMatrix);
 }

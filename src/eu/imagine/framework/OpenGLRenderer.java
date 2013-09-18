@@ -2,6 +2,7 @@ package eu.imagine.framework;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -21,6 +22,10 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     private ArrayList<Trackable> toRender;
 
+    private final float[] mMVPMatrix = new float[16];
+    private final float[] mProjMatrix = new float[16];
+    private final float[] mVMatrix = new float[16];
+
     protected OpenGLRenderer(MainInterface mainInterface) {
         this.log = Messenger.getInstance();
         this.mainInterface = mainInterface;
@@ -29,7 +34,7 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        GLES20.glClearColor(0f, 0f, 0f, 0.2f);
     }
 
     @Override
@@ -48,9 +53,14 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         }
         // ------------------------ RENDER ------------------------
         if (!toRender.isEmpty()) {
+            // Set the camera position (View matrix)
+            Matrix.setLookAtM(mVMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+
+            // Calculate the projection and view transformation
+            Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mVMatrix, 0);
             for (Trackable trackable : toRender) {
                 log.debug(TAG, "Rendering " + trackable.toString() + ".");
-                trackable.draw();
+                trackable.draw(mMVPMatrix);
             }
         }
         if (MainInterface.DEBUG_FRAME_LOGGING) {
@@ -62,5 +72,11 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
+
+        float ratio = (float) width / height;
+
+        // this projection matrix is applied to object coordinates
+        // in the onDrawFrame() method
+        Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
     }
 }

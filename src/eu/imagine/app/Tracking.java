@@ -35,6 +35,7 @@ public class Tracking implements Entity {
     private final int mProgram;
     private int mPositionHandle;
     private int mColorHandle;
+    private int mMVPMatrixHandle;
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
@@ -81,11 +82,6 @@ public class Tracking implements Entity {
         return ID;
     }
 
-    @Override
-    public OpenGLDraw getDraw() {
-        return this;
-    }
-
     public static int loadShader(int type, String shaderCode){
 
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
@@ -100,8 +96,8 @@ public class Tracking implements Entity {
     }
 
     @Override
-    public void draw() {
-        // Add program to OpenGL ES environment
+    public void draw(float[] mvpMatrix) {
+        // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
 
         // get handle to vertex shader's vPosition member
@@ -112,13 +108,20 @@ public class Tracking implements Entity {
 
         // Prepare the triangle coordinate data
         GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
+                GLES20.GL_FLOAT, false,
+                vertexStride, vertexBuffer);
 
         // get handle to fragment shader's vColor member
         mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 
         // Set color for drawing the triangle
         GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+
+        // get handle to shape's transformation matrix
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+
+        // Apply the projection and view transformation
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
         // Draw the triangle
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
@@ -130,5 +133,10 @@ public class Tracking implements Entity {
     @Override
     public boolean getVisibility() {
         return true;
+    }
+
+    @Override
+    public OpenGLDraw getDraw() {
+        return this;
     }
 }

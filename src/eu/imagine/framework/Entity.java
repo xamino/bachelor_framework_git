@@ -8,6 +8,6 @@ package eu.imagine.framework;
  */
 public interface Entity extends OpenGLDraw{
     public int getID();
-    public OpenGLDraw getDraw();
     public boolean getVisibility();
+    public OpenGLDraw getDraw();
 }

@@ -22,7 +22,7 @@ class Trackable {
         return "Trackable | ID:" + ID;
     }
 
-    public void draw() {
-        DRAW.draw();
+    public void draw(float[] mMVPMatrix) {
+        DRAW.draw(mMVPMatrix);
     }
 }
