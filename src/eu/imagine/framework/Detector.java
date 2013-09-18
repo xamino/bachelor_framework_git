@@ -23,13 +23,13 @@ class Detector {
     private final String TAG = "Detector";
 
     // FLAGS (compositeFrameOut order!)
-    protected boolean USE_CANNY = false;
-    protected boolean DEBUG_PREP_FRAME = false;
-    protected boolean DEBUG_CONTOURS = false;
-    protected boolean DEBUG_POLY = false;
-    protected boolean DEBUG_DRAW_MARKERS = false;
-    protected boolean DEBUG_DRAW_MARKER_ID = true;
-    protected boolean DEBUG_DRAW_SAMPLING = false;
+    protected static boolean USE_CANNY = false;
+    protected static boolean DEBUG_PREP_FRAME = false;
+    protected static boolean DEBUG_CONTOURS = false;
+    protected static boolean DEBUG_POLY = false;
+    protected static boolean DEBUG_DRAW_MARKERS = false;
+    protected static boolean DEBUG_DRAW_MARKER_ID = false;
+    protected static boolean DEBUG_DRAW_SAMPLING = false;
 
     // Important numbers, shouldn't be changed at runtime!
     private final int MARKER_GRID = 6;

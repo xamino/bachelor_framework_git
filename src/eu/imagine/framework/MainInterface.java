@@ -18,8 +18,9 @@ import java.util.ArrayList;
 public class MainInterface {
 
     // Allow debug logging:
-    protected static boolean DEBUG_LOGGING = true;
+    protected static boolean DEBUG_LOGGING = false;
     protected static boolean DEBUG_FRAME_LOGGING = false;
+    protected boolean ONLY_HOMOGRAPHY = false;
     protected boolean RUN_OPENCV = true;
     protected boolean RUN_RENDERER = true;
     protected boolean DEBUG_FRAME = false;
@@ -38,8 +39,6 @@ public class MainInterface {
 
     // Store Homography listeners:
     private ArrayList<HomographyListener> listeners;
-    // TODO: IMPLEMENT
-    private boolean NO_RENDER = false;
 
     public MainInterface(Activity mainActivity, ViewGroup groupView) {
         this.log = Messenger.getInstance();
@@ -111,6 +110,78 @@ public class MainInterface {
     }
 
     /**
+     * Method for setting debug flags.
+     *
+     * @param value The flag to set true.
+     */
+    public void setDebugFlag(Flags value) {
+        setFlag(value, true);
+    }
+
+    /**
+     * Method for removing debug flags.
+     *
+     * @param value The flag to set to false.
+     */
+    public void removeDebugFlag(Flags value) {
+        setFlag(value, false);
+    }
+
+    /**
+     * Helper function for setting flags.
+     *
+     * @param value The flag to set.
+     * @param bool  The value to set that flag at.
+     */
+    private void setFlag(Flags value, boolean bool) {
+        switch (value) {
+            case ONLY_HOMOGRAPHY:
+                this.RUN_RENDERER = !bool;
+                this.ONLY_HOMOGRAPHY = bool;
+                break;
+            case RUN_OPENCV:
+                this.RUN_OPENCV = bool;
+                break;
+            case RUN_RENDERER:
+                this.RUN_RENDERER = bool;
+                break;
+            case DEBUG_FRAME_LOGGING:
+                MainInterface.DEBUG_FRAME_LOGGING = bool;
+                break;
+            case DEBUG_LOGGING:
+                MainInterface.DEBUG_LOGGING = bool;
+                break;
+            case DEBUG_FRAME:
+                this.DEBUG_FRAME = bool;
+                break;
+            case USE_CANNY:
+                Detector.USE_CANNY = bool;
+                break;
+            case DEBUG_PREP_FRAME:
+                Detector.DEBUG_PREP_FRAME = bool;
+                break;
+            case DEBUG_CONTOURS:
+                Detector.DEBUG_CONTOURS = bool;
+                break;
+            case DEBUG_POLY:
+                Detector.DEBUG_POLY = bool;
+                break;
+            case DEBUG_DRAW_MARKERS:
+                Detector.DEBUG_DRAW_MARKERS = bool;
+                break;
+            case DEBUG_DRAW_SAMPLING:
+                Detector.DEBUG_DRAW_SAMPLING = bool;
+                break;
+            case DEBUG_DRAW_MARKER_ID:
+                Detector.DEBUG_DRAW_MARKER_ID = bool;
+                break;
+            default:
+                log.log(TAG, "Failed to set flag " + value + "!");
+                break;
+        }
+    }
+
+    /**
      * Method that receives candidate markers. Here, they are filtered for
      * the markers we want and partnered with the entities we'll show.
      *
@@ -119,7 +190,11 @@ public class MainInterface {
     protected synchronized void updateList(ArrayList<Marker> markerCandidates) {
         detectedMarkers = markerCandidates;
         updatedData = true;
-        // TODO: IMPLEMENT HOMOGRAPHY LISTENERS!
+        if (ONLY_HOMOGRAPHY) {
+            for (HomographyListener listener : listeners) {
+                listener.receiveHomographies(detectedMarkers);
+            }
+        }
     }
 
     /**
