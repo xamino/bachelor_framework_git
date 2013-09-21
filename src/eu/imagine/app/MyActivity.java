@@ -22,15 +22,11 @@ public class MyActivity extends Activity {
         framework = new MainInterface(this, (ViewGroup) findViewById(R.id.group));
         // Set some debugging flags:
         framework.setDebugFlag(Flags.DEBUG_LOGGING);
-        framework.setDebugFlag(Flags.DEBUG_FRAME);
-        framework.setDebugFlag(Flags.DEBUG_DRAW_MARKERS);
-        framework.setDebugFlag(Flags.DEBUG_DRAW_MARKER_ID);
-        framework.setDebugFlag(Flags.DEBUG_DRAW_SAMPLING);
         // Add some test entities:
-        Tracking one = new Tracking(172);
-        // Tracking two = new Tracking(182);
+        Tracking one = new Tracking(242);
+        Tracking two = new Tracking(234);
         framework.registerEntity(one);
-        // framework.registerEntity(two);
+        framework.registerEntity(two);
         // Call on create:
         framework.onCreate();
     }

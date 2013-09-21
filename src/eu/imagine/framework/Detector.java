@@ -37,8 +37,7 @@ class Detector {
     private final int MARKER_SQUARE = 5;
     private final int MARKER_SIZE = MARKER_GRID * MARKER_SQUARE;
     private final int RENDER_SCALE = 3;
-    private final int BINARY_THRESHOLD = 60;
-    private final int SAMPLING_ERRORS = 4;
+    private final int BINARY_THRESHOLD = 80;
     private final int step = MARKER_SIZE / MARKER_GRID;
     private final int half = step / 2;
 
@@ -50,10 +49,8 @@ class Detector {
     private MatOfPoint2f result, standardMarker;
 
     // Colors
-    private final double[] GREEN = new double[]{0, 255, 0, 0};
-    private final double[] RED = new double[]{255, 0, 0, 0};
-    private final double[] WHITE = new double[]{255, 255, 255, 0};
-    private final double[] BLACK = new double[]{0, 0, 0, 0};
+    private final double[] WHITE = new double[]{255, 255, 255, 255};
+    private final double[] BLACK = new double[]{0, 0, 0, 255};
 
     protected Detector(MainInterface mainInterface) {
         this.log = Messenger.getInstance();
@@ -134,13 +131,10 @@ class Detector {
                     standardMarker);
             // Apply to get marker grayTexture
             // speed: ~12ms
-            Imgproc.warpPerspective(gray, out, tempPerspective,
-                    new Size(MARKER_SIZE, MARKER_SIZE));
-            Mat out2 = new Mat();
-            Imgproc.warpPerspective(rgba, out2, tempPerspective,
+            Imgproc.warpPerspective(rgba, out, tempPerspective,
                     new Size(MARKER_SIZE, MARKER_SIZE));
             // Check if marker
-            // speed: ~30ms
+            // speed: ~9ms (range: 5ms to 30ms!)
             Marker mark = isMarker(result, tempPerspective, out);
             if (mark == null)
                 continue;
@@ -221,39 +215,39 @@ class Detector {
     private Marker isMarker(MatOfPoint2f result, Mat tempPerspective,
                             Mat texture) {
         boolean[][] pattern = new boolean[4][4];
-        //log.pushTimer(this, "steps");
-        //log.log(TAG, log.popTimer(this).time+"ms");
 
         // reset error allowance
         int errorAllowance = 0;
         // Check border:
         for (int i = 1; i < MARKER_GRID - 1; i++) {
             if (testSample(half + (i * step), half,
-                    texture) > BINARY_THRESHOLD)
+                    texture) > 0)
                 errorAllowance++;
-            if (testSample(half, half + (i * step), texture) > BINARY_THRESHOLD)
+            if (testSample(half, half + (i * step), texture) > 0)
                 errorAllowance++;
             if (testSample(half + (i * step), MARKER_SIZE - 1 - half,
-                    texture) > BINARY_THRESHOLD)
+                    texture) > 0)
                 errorAllowance++;
             if (testSample(MARKER_SIZE - 1 - half, half + (i * step),
-                    texture) > BINARY_THRESHOLD)
+                    texture) > 0)
                 errorAllowance++;
         }
 
-        if (errorAllowance > SAMPLING_ERRORS) {
-            log.debug(TAG, "Failed at border!");
+        // we'll allow 4 incorrect border pieces but no more
+        if (errorAllowance > 4) {
             return null;
         }
         // Now read pattern:
+        // time: ~3ms
         for (int i = 0; i < 4; i++)
             for (int j = 0; j < 4; j++) {
                 pattern[i][j] = (testSample(half + (i + 1) * step,
-                        half + (j + 1) * step, texture) > BINARY_THRESHOLD);
+                        half + (j + 1) * step, texture) > 0);
             }
 
         // Check corners, get rotation, and rotate pattern to correct
         // orientation:
+        // time: ~0ms
         int angle;
         if (!pattern[0][0] && pattern[0][3] && pattern[3][0] && pattern[3][3]) {
             angle = -90;
@@ -272,12 +266,11 @@ class Detector {
         } else {
             // This happens when a black border is found but has no
             // orientation information.
-            log.debug(TAG, "Failed at orientation detection!");
-            angle = -1;
-            // return null;
+            return null;
         }
 
         // Get Hamming code corrected id:
+        // time: ~0ms
         int id = MarkerPatternHelper.getID(pattern);
 
         // For debug, we need to remember the grayTexture, otherwise not.
@@ -300,16 +293,18 @@ class Detector {
         int countBlack = 0;
         for (int i = -MARKER_SQUARE / 2; i <= MARKER_SQUARE / 2; i++)
             for (int j = -MARKER_SQUARE / 2; j <= MARKER_SQUARE / 2; j++) {
-                if (texture.get(x + i, y + j)[0] == 0d)
+                int mean = (int) (texture.get(x + i, y + j)[0] + texture.get(x + i,
+                        y + j)[1] + texture.get(x + i, y + j)[2] / 3);
+                if (mean < BINARY_THRESHOLD)
                     countBlack++;
             }
-        if (countBlack > SAMPLING_ERRORS) {
+        if (countBlack > 12) {
             if (DEBUG_DRAW_SAMPLING)
-                texture.put(x, y, GREEN);
+                texture.put(x, y, WHITE);
             return -1;
         } else {
             if (DEBUG_DRAW_SAMPLING)
-                texture.put(x, y, RED);
+                texture.put(x, y, BLACK);
             return 1;
         }
     }
