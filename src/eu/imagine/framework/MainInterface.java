@@ -231,6 +231,7 @@ public class MainInterface {
      */
     protected void updateList(ArrayList<Marker> markerCandidates) {
         synchronized (synLock) {
+
             updatedData = true;
             if (ONLY_HOMOGRAPHY) {
                 for (HomographyListener listener : listeners) {

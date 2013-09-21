@@ -3,6 +3,7 @@ package eu.imagine.framework;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.imgproc.Imgproc;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,7 +17,7 @@ public class Marker {
      * Stores bool representation of pattern
      */
     private boolean[][] pattern;
-    protected Mat texture;
+    protected Mat grayTexture, rgbaTexture;
     /**
      * Contains angle.
      */
@@ -44,14 +45,17 @@ public class Marker {
     // TODO: Consider which values will really be needed on the OpenGL side
     // and remove all others, as they only decrease speed!
     public Marker(MatOfPoint2f originalCorners, Mat markerPerspective,
-                  int angle, int id, boolean[][] pattern, Mat texture) {
+                  int angle, int id, boolean[][] pattern, Mat grayTexture) {
         this.id = id;
         this.angle = angle;
         this.pattern = pattern;
         // MUST COPY ALL VALUES!
         this.originalCorners = new MatOfPoint2f(originalCorners.toArray());
         this.markerPerspective = markerPerspective.clone();
-        this.texture = texture.clone();
+        this.grayTexture = grayTexture.clone();
+        this.rgbaTexture = new Mat();
+        Imgproc.cvtColor(this.grayTexture, this.rgbaTexture ,
+                Imgproc.COLOR_GRAY2RGBA);
     }
 
     /**
@@ -68,7 +72,7 @@ public class Marker {
         this.angle = angle;
         this.markerPerspective = markerPerspective.clone();
         this.pattern = null;
-        this.texture = null;
+        this.grayTexture = null;
         this.originalCorners = null;
     }
 

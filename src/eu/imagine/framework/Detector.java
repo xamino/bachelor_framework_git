@@ -24,6 +24,7 @@ class Detector {
 
     // FLAGS (compositeFrameOut order!)
     protected static boolean USE_CANNY = false;
+    protected static boolean USE_ADAPTIVE = false;
     protected static boolean DEBUG_PREP_FRAME = false;
     protected static boolean DEBUG_CONTOURS = false;
     protected static boolean DEBUG_POLY = false;
@@ -33,9 +34,10 @@ class Detector {
 
     // Important numbers, shouldn't be changed at runtime!
     private final int MARKER_GRID = 6;
-    private final int MARKER_SQUARE = 3;
+    private final int MARKER_SQUARE = 5;
     private final int MARKER_SIZE = MARKER_GRID * MARKER_SQUARE;
-    private final int RENDER_SCALE = 5;
+    private final int RENDER_SCALE = 3;
+    private final int BINARY_THRESHOLD = 60;
     private final int SAMPLING_ERRORS = 4;
     private final int step = MARKER_SIZE / MARKER_GRID;
     private final int half = step / 2;
@@ -81,19 +83,25 @@ class Detector {
 
         if (USE_CANNY) {
             Imgproc.Canny(gray, out, 50, 150);
-        } else {
+        } else if (USE_ADAPTIVE) {
             Imgproc.adaptiveThreshold(gray, out, 255,
                     Imgproc.ADAPTIVE_THRESH_MEAN_C,
                     Imgproc.THRESH_BINARY, 81, 7);
+        } else {
+            // Speed: ~8ms
+            Imgproc.threshold(gray, out, BINARY_THRESHOLD, 255, Imgproc.THRESH_BINARY);
         }
 
         if (DEBUG_PREP_FRAME)
             return out;
 
+        // Speed: ~22ms
         Imgproc.findContours(out, contoursAll, new Mat(),
                 Imgproc.RETR_LIST,
                 Imgproc.CHAIN_APPROX_NONE);
+
         // Remove too small contours:
+        // Speed: ~0ms
         for (MatOfPoint contour : contoursAll) {
             if (contour.total() > 200)
                 contours.add(contour);
@@ -108,22 +116,31 @@ class Detector {
         }
 
         // Get all 4-vertice polygons from contours:
+        // Speed: ~330ms
         for (MatOfPoint contour : contours) {
             MatOfPoint2f input = new MatOfPoint2f(contour.toArray());
+            // speed: ~2ms
             Imgproc.approxPolyDP(input, result, input.total() * 0.10,
                     true);
             // Only take contours with ==4 points
+            // speed: ~1ms
             if (result.total() != 4 || !Imgproc.isContourConvex(new
                     MatOfPoint(result.toArray()))) {
                 continue;
             }
             // Calculate perspective transform
+            // speed: ~0ms
             Mat tempPerspective = Imgproc.getPerspectiveTransform(result,
                     standardMarker);
-            // Apply to get marker texture
-            Imgproc.warpPerspective(rgba, out, tempPerspective,
+            // Apply to get marker grayTexture
+            // speed: ~12ms
+            Imgproc.warpPerspective(gray, out, tempPerspective,
+                    new Size(MARKER_SIZE, MARKER_SIZE));
+            Mat out2 = new Mat();
+            Imgproc.warpPerspective(rgba, out2, tempPerspective,
                     new Size(MARKER_SIZE, MARKER_SIZE));
             // Check if marker
+            // speed: ~30ms
             Marker mark = isMarker(result, tempPerspective, out);
             if (mark == null)
                 continue;
@@ -142,7 +159,7 @@ class Detector {
             if (DEBUG_DRAW_MARKERS) {
                 int count = 0;
                 for (Marker mark : markerCandidates) {
-                    Mat tempText = mark.texture;
+                    Mat tempText = mark.rgbaTexture;
                     // Might, but shouldn't be null
                     if (tempText == null) {
                         log.debug(TAG, "DEBUG_DRAW_MARKERS: Texture NULL!");
@@ -201,33 +218,38 @@ class Detector {
         return compositeFrameOut;
     }
 
-    private Marker isMarker(MatOfPoint2f result, Mat tempPerspective, Mat texture) {
+    private Marker isMarker(MatOfPoint2f result, Mat tempPerspective,
+                            Mat texture) {
         boolean[][] pattern = new boolean[4][4];
-        Imgproc.cvtColor(texture, texture, Imgproc.COLOR_RGBA2GRAY);
-        Imgproc.threshold(texture, texture, 40, 255, Imgproc.THRESH_BINARY);
-        Imgproc.cvtColor(texture, texture, Imgproc.COLOR_GRAY2RGBA);
+        //log.pushTimer(this, "steps");
+        //log.log(TAG, log.popTimer(this).time+"ms");
 
         // reset error allowance
         int errorAllowance = 0;
         // Check border:
         for (int i = 1; i < MARKER_GRID - 1; i++) {
-            if (testSample(half + (i * step), half, texture) > 0)
+            if (testSample(half + (i * step), half,
+                    texture) > BINARY_THRESHOLD)
                 errorAllowance++;
-            if (testSample(half, half + (i * step), texture) > 0)
+            if (testSample(half, half + (i * step), texture) > BINARY_THRESHOLD)
                 errorAllowance++;
-            if (testSample(half + (i * step), MARKER_SIZE - 1 - half, texture) > 0)
+            if (testSample(half + (i * step), MARKER_SIZE - 1 - half,
+                    texture) > BINARY_THRESHOLD)
                 errorAllowance++;
-            if (testSample(MARKER_SIZE - 1 - half, half + (i * step), texture) > 0)
+            if (testSample(MARKER_SIZE - 1 - half, half + (i * step),
+                    texture) > BINARY_THRESHOLD)
                 errorAllowance++;
         }
 
-        if (errorAllowance > SAMPLING_ERRORS)
+        if (errorAllowance > SAMPLING_ERRORS) {
+            log.debug(TAG, "Failed at border!");
             return null;
+        }
         // Now read pattern:
         for (int i = 0; i < 4; i++)
             for (int j = 0; j < 4; j++) {
                 pattern[i][j] = (testSample(half + (i + 1) * step,
-                        half + (j + 1) * step, texture) > 0);
+                        half + (j + 1) * step, texture) > BINARY_THRESHOLD);
             }
 
         // Check corners, get rotation, and rotate pattern to correct
@@ -250,13 +272,15 @@ class Detector {
         } else {
             // This happens when a black border is found but has no
             // orientation information.
-            return null;
+            log.debug(TAG, "Failed at orientation detection!");
+            angle = -1;
+            // return null;
         }
 
         // Get Hamming code corrected id:
         int id = MarkerPatternHelper.getID(pattern);
 
-        // For debug, we need to remember the texture, otherwise not.
+        // For debug, we need to remember the grayTexture, otherwise not.
         if (mainInterface.DEBUG_FRAME && (DEBUG_DRAW_MARKERS || DEBUG_POLY)) {
             // INFO: Debugging with this HALFS the framerate!
             return new Marker(result, tempPerspective, angle, id, pattern,
@@ -269,7 +293,7 @@ class Detector {
     /**
      * @param x       X-Coordinate.
      * @param y       Y-Coordinate.
-     * @param texture Reference to texture.
+     * @param texture Reference to grayTexture.
      * @return Negative for black, positive for white
      */
     private int testSample(int x, int y, Mat texture) {
