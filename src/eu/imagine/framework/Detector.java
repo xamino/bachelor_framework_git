@@ -38,6 +38,7 @@ class Detector {
     private final int MARKER_SIZE = MARKER_GRID * MARKER_SQUARE;
     private final int RENDER_SCALE = 3;
     private final int BINARY_THRESHOLD = 80;
+    private final int SAMPLE_THRESHOLD = (MARKER_SQUARE * MARKER_SQUARE) / 2;
     private final int step = MARKER_SIZE / MARKER_GRID;
     private final int half = step / 2;
 
@@ -298,7 +299,7 @@ class Detector {
                 if (mean < BINARY_THRESHOLD)
                     countBlack++;
             }
-        if (countBlack > 12) {
+        if (countBlack > SAMPLE_THRESHOLD) {
             if (DEBUG_DRAW_SAMPLING)
                 texture.put(x, y, WHITE);
             return -1;

@@ -14,7 +14,7 @@ import java.util.ArrayList;
  * Date: 9/15/13
  * Time: 3:25 PM
  */
-class OpenGLRenderer implements GLSurfaceView.Renderer {
+public class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     private final MainInterface mainInterface;
     private Messenger log;
@@ -34,15 +34,20 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        GLES20.glClearColor(0f, 0f, 0f, 0.2f);
+        GLES20.glClearColor(1f, 0f, 0f, 0.5f);
     }
 
+    // TODO: Check call to OpenGL ES API with no current context (logged once
+    // per thread)call to OpenGL ES API with no current context (logged once
+    // per thread)
     @Override
     public void onDrawFrame(GL10 gl) {
         if (MainInterface.DEBUG_FRAME_LOGGING)
             log.pushTimer(this, "opengl frame");
+
         // Clear:
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
+
         // If new markerlist, get:
         if (mainInterface.getListUpdateStatus()) {
             this.toRender = mainInterface.getList();
@@ -59,7 +64,6 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
             // Calculate the projection and view transformation
             Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mVMatrix, 0);
             for (Trackable trackable : toRender) {
-                log.debug(TAG, "Rendering " + trackable.toString() + ".");
                 trackable.draw(mMVPMatrix);
             }
         }
@@ -78,5 +82,14 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
         Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+    }
+
+    public static void checkGlError(String glOperation) {
+        int error;
+        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+            Messenger.getInstance().log("OpenGLRenderer",
+                    glOperation + ": glError" + " " + error);
+            throw new RuntimeException(glOperation + ": glError " + error);
+        }
     }
 }

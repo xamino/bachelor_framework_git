@@ -24,9 +24,9 @@ public class MyActivity extends Activity {
         framework.setDebugFlag(Flags.DEBUG_LOGGING);
         // Add some test entities:
         Tracking one = new Tracking(242);
-        Tracking two = new Tracking(234);
+        // Tracking two = new Tracking(234);
         framework.registerEntity(one);
-        framework.registerEntity(two);
+        // framework.registerEntity(two);
         // Call on create:
         framework.onCreate();
     }

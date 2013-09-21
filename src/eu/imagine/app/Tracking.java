@@ -3,6 +3,7 @@ package eu.imagine.app;
 import android.opengl.GLES20;
 import eu.imagine.framework.Entity;
 import eu.imagine.framework.OpenGLDraw;
+import eu.imagine.framework.OpenGLRenderer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -18,10 +19,12 @@ public class Tracking implements Entity {
 
     private int ID;
 
+    // TODO: Watch out, this was changed:
     private final String vertexShaderCode =
-            "attribute vec4 vPosition;" +
+            "uniform mat4 uMVPMatrix;" +
+                    "attribute vec4 vPosition;" +
                     "void main() {" +
-                    "  gl_Position = vPosition;" +
+                    "  gl_Position = uMVPMatrix * vPosition;" +
                     "}";
 
     private final String fragmentShaderCode =
@@ -40,7 +43,7 @@ public class Tracking implements Entity {
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
     static float triangleCoords[] = { // in counterclockwise order:
-            0.0f,  0.622008459f, 0.0f,   // top
+            0.0f, 0.622008459f, 0.0f,   // top
             -0.5f, -0.311004243f, 0.0f,   // bottom left
             0.5f, -0.311004243f, 0.0f    // bottom right
     };
@@ -48,7 +51,7 @@ public class Tracking implements Entity {
     private final int vertexStride = COORDS_PER_VERTEX * 4; // bytes per vertex
 
     // Set color with red, green, blue and alpha (opacity) values
-    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
+    float color[] = {0.63671875f, 0.76953125f, 0.22265625f, 1.0f};
 
     public Tracking(int ID) {
         this.ID = ID;
@@ -82,7 +85,7 @@ public class Tracking implements Entity {
         return ID;
     }
 
-    public static int loadShader(int type, String shaderCode){
+    public static int loadShader(int type, String shaderCode) {
 
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
         // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
@@ -118,10 +121,13 @@ public class Tracking implements Entity {
         GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 
         // get handle to shape's transformation matrix
+        // TODO: Before, the error happened here!
         mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        OpenGLRenderer.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+        OpenGLRenderer.checkGlError("glUniformMatrix4fv");
 
         // Draw the triangle
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
