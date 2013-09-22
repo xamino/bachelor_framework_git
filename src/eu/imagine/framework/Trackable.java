@@ -1,7 +1,5 @@
 package eu.imagine.framework;
 
-import org.opencv.core.Mat;
-
 import java.nio.FloatBuffer;
 
 /**
@@ -11,9 +9,9 @@ class Trackable {
 
     private final FloatBuffer FLOATBUFFER;
     private final int ID;
-    private final Mat PERSPECTIVE;
+    private final float[] PERSPECTIVE;
 
-    public Trackable(final int ID, final Mat PERSPECTIVE,
+    public Trackable(final int ID, final float[] PERSPECTIVE,
                      final FloatBuffer FLOATBUFFER) {
         this.ID = ID;
         this.PERSPECTIVE = PERSPECTIVE;
@@ -28,7 +26,7 @@ class Trackable {
         return this.FLOATBUFFER;
     }
 
-    public Mat getPerspective() {
+    public float[] getPerspective() {
         return PERSPECTIVE;
     }
 }

@@ -3,7 +3,6 @@ package eu.imagine.framework;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import org.opencv.core.Mat;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -119,10 +118,10 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
      * Method for painting any given object.
      *
      * @param data        The vertice data containing coordinates and colors to draw.
-     * @param perspective The Mat containing the matrix for correctly placing
-     *                    the object onto the marker.
+     * @param perspective The matrix for correctly placing the object onto the marker.
      */
-    private void drawObject(final FloatBuffer data, final Mat perspective) {
+    private void drawObject(final FloatBuffer data,
+                            final float[] perspective) {
         // Pass in the position information
         data.position(mPositionOffset);
         GLES20.glVertexAttribPointer(mPositionHandle, mPositionDataSize, GLES20.GL_FLOAT, false,

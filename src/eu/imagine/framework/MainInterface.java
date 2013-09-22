@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import org.opencv.android.JavaCameraView;
+import org.opencv.core.Mat;
 
 import java.util.ArrayList;
 
@@ -251,14 +252,32 @@ public class MainInterface {
                         continue;
                     // Now add it to the renderTrackable list if marker found:
                     Marker toRemove = null;
-                    for (Marker mark : markerCandidates)
+                    for (Marker mark : markerCandidates) {
+                        // Add to rendering:
                         if (mark.getID() == tracking.getID()) {
-                            // Add to rendering:
+                            // prepare OpenGL usable perspective matrix:
+                            Mat per = mark.getPerspective();
+                            float[] perspective = new float[] {
+                                    (float) per.get(0, 0)[0],
+                                    (float) per.get(1, 0)[0],
+                                    (float) per.get(2, 0)[0],
+                                    0,
+                                    (float) per.get(0, 1)[0],
+                                    (float) per.get(1, 1)[0],
+                                    (float) per.get(2, 1)[0],
+                                    0,
+                                    (float) per.get(0, 2)[0],
+                                    (float) per.get(1, 2)[0],
+                                    (float) per.get(2, 2)[0],
+                                    0,
+                                    0,0,0,0
+                            };
                             detectedTrackables.add(new Trackable(mark.getID(),
-                                    mark.getPerspective(), tracking.getFloatBuffer()));
+                                    perspective, tracking.getFloatBuffer()));
                             toRemove = mark;
                             break;
                         }
+                    }
                     // Remove marker for performance reasons
                     if (toRemove != null)
                         markerCandidates.remove(toRemove);

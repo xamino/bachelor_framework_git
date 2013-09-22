@@ -47,7 +47,7 @@ class Detector {
     private Mat compositeFrameOut;
     private ArrayList<MatOfPoint> contours, contoursAll;
     private ArrayList<Marker> markerCandidates;
-    private MatOfPoint2f result, standardMarker;
+    private MatOfPoint2f result, standardMarker, standardMarkerNormalized;
 
     // Colors
     private final double[] WHITE = new double[]{255, 255, 255, 255};
@@ -67,6 +67,9 @@ class Detector {
         this.standardMarker.fromArray(new Point(0, MARKER_SIZE),
                 new Point(0, 0),
                 new Point(MARKER_SIZE, 0), new Point(MARKER_SIZE, MARKER_SIZE));
+        this.standardMarkerNormalized = new MatOfPoint2f();
+        this.standardMarkerNormalized.fromArray(new Point(0, 1),
+                new Point(0, 0), new Point(1, 0), new Point(1, 1));
         // Correctly set flags
         this.updateFlags();
     }
@@ -130,13 +133,15 @@ class Detector {
             // speed: ~0ms
             Mat tempPerspective = Imgproc.getPerspectiveTransform(result,
                     standardMarker);
+            Mat inversePerspective = Imgproc.getPerspectiveTransform
+                    (standardMarkerNormalized, result);
             // Apply to get marker grayTexture
             // speed: ~12ms
             Imgproc.warpPerspective(rgba, out, tempPerspective,
                     new Size(MARKER_SIZE, MARKER_SIZE));
             // Check if marker
             // speed: ~9ms (range: 5ms to 30ms!)
-            Marker mark = isMarker(result, tempPerspective, out);
+            Marker mark = isMarker(result, inversePerspective, out);
             if (mark == null)
                 continue;
             // Save marker candidate
