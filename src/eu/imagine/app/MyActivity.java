@@ -17,7 +17,7 @@ public class MyActivity extends Activity {
     /**
      * Example object to render. Format is 3 coords followed by 4 colors.
      */
-    private float[] triangle = new float[]{
+    private float[] oneData = new float[]{
             -0.5f, -0.25f, 0.0f,
             1.0f, 0.0f, 0.0f, 1.0f,
 
@@ -28,6 +28,17 @@ public class MyActivity extends Activity {
             0.0f, 1.0f, 0.0f, 1.0f
     };
 
+    private float[] twoData = new float[]{
+            1f, -0.25f, 0.2f,
+            0.0f, 0.0f, 1.0f, 0.5f,
+
+            1f, 0.559016994f, 0.2f,
+            1.0f, 1.0f, 0.0f, 0.5f,
+
+            0.5f, -0.25f, 0.2f,
+            1.0f, 0.0f, 1.0f, 0.5f
+    };
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
@@ -36,16 +47,11 @@ public class MyActivity extends Activity {
         framework = new MainInterface(this, (ViewGroup) findViewById(R.id.group));
         // Set some debugging flags:
         framework.setDebugFlag(Flags.DEBUG_LOGGING);
-        framework.setDebugFlag(Flags.DEBUG_FRAME);
-        framework.setDebugFlag(Flags.DEBUG_POLY);
-        framework.setDebugFlag(Flags.DEBUG_DRAW_SAMPLING);
-        framework.setDebugFlag(Flags.DEBUG_DRAW_MARKERS);
-        // framework.setDebugFlag(Flags.DEBUG_DRAW_MARKER_ID);
         // Add some test entities:
-        Tracking one = new Tracking(242, true, triangle);
-        // Tracking two = new Tracking(234);
+        Tracking one = new Tracking(242, true, oneData);
+        Tracking two = new Tracking(42, true, twoData);
         framework.registerEntity(one);
-        // framework.registerEntity(two);
+        framework.registerEntity(two);
         // Call on create:
         framework.onCreate();
     }
