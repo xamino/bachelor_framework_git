@@ -255,7 +255,7 @@ public class MainInterface {
                         if (mark.getID() == tracking.getID()) {
                             // Add to rendering:
                             detectedTrackables.add(new Trackable(mark.getID(),
-                                    mark.getPerspective(), tracking.getDraw()));
+                                    mark.getPerspective(), tracking.getFloatBuffer()));
                             toRemove = mark;
                             break;
                         }

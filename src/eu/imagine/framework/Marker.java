@@ -3,7 +3,6 @@ package eu.imagine.framework;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
-import org.opencv.imgproc.Imgproc;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,7 +16,7 @@ public class Marker {
      * Stores bool representation of pattern
      */
     private boolean[][] pattern;
-    protected Mat grayTexture, rgbaTexture;
+    protected Mat grayTexture;
     /**
      * Contains angle.
      */
@@ -53,9 +52,6 @@ public class Marker {
         this.originalCorners = new MatOfPoint2f(originalCorners.toArray());
         this.markerPerspective = markerPerspective.clone();
         this.grayTexture = grayTexture.clone();
-        this.rgbaTexture = new Mat();
-        Imgproc.cvtColor(this.grayTexture, this.rgbaTexture ,
-                Imgproc.COLOR_GRAY2RGBA);
     }
 
     /**

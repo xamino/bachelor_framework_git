@@ -154,7 +154,7 @@ class Detector {
             if (DEBUG_DRAW_MARKERS) {
                 int count = 0;
                 for (Marker mark : markerCandidates) {
-                    Mat tempText = mark.rgbaTexture;
+                    Mat tempText = mark.grayTexture;
                     // Might, but shouldn't be null
                     if (tempText == null) {
                         log.debug(TAG, "DEBUG_DRAW_MARKERS: Texture NULL!");
@@ -235,7 +235,7 @@ class Detector {
         }
 
         // we'll allow 4 incorrect border pieces but no more
-        if (errorAllowance > 4) {
+        if (errorAllowance > 4 && !DEBUG_DRAW_MARKER_ID && !DEBUG_DRAW_MARKERS) {
             return null;
         }
         // Now read pattern:
@@ -267,7 +267,9 @@ class Detector {
         } else {
             // This happens when a black border is found but has no
             // orientation information.
-            return null;
+            angle = -1;
+            if (!DEBUG_DRAW_MARKER_ID && !DEBUG_DRAW_MARKERS)
+                return null;
         }
 
         // Get Hamming code corrected id:
@@ -294,8 +296,8 @@ class Detector {
         int countBlack = 0;
         for (int i = -MARKER_SQUARE / 2; i <= MARKER_SQUARE / 2; i++)
             for (int j = -MARKER_SQUARE / 2; j <= MARKER_SQUARE / 2; j++) {
-                int mean = (int) (texture.get(x + i, y + j)[0] + texture.get(x + i,
-                        y + j)[1] + texture.get(x + i, y + j)[2] / 3);
+                double[] value = texture.get(x + i, y + j);
+                int mean = (int) ((value[0] + value[1] + value[2]) / 3);
                 if (mean < BINARY_THRESHOLD)
                     countBlack++;
             }

@@ -2,27 +2,33 @@ package eu.imagine.framework;
 
 import org.opencv.core.Mat;
 
+import java.nio.FloatBuffer;
+
 /**
  * Class that holds the relationship between marker and object to be rendered.
  */
 class Trackable {
 
-    final int ID;
-    final Mat PERSPECTIVE;
-    final OpenGLDraw DRAW;
+    private final FloatBuffer FLOATBUFFER;
+    private final int ID;
+    private final Mat PERSPECTIVE;
 
     public Trackable(final int ID, final Mat PERSPECTIVE,
-                     final OpenGLDraw DRAW) {
+                     final FloatBuffer FLOATBUFFER) {
         this.ID = ID;
         this.PERSPECTIVE = PERSPECTIVE;
-        this.DRAW = DRAW;
+        this.FLOATBUFFER = FLOATBUFFER;
     }
 
     public String toString() {
         return "Trackable | ID:" + ID;
     }
 
-    public void draw(float[] mMVPMatrix) {
-        DRAW.draw(mMVPMatrix);
+    public FloatBuffer getFloatbuffer() {
+        return this.FLOATBUFFER;
+    }
+
+    public Mat getPerspective() {
+        return PERSPECTIVE;
     }
 }
