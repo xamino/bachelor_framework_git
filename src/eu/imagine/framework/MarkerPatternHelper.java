@@ -16,6 +16,7 @@ public class MarkerPatternHelper {
      * @return The complete pattern that resembles the marker,
      *         including coded ID, coded direction, and borders.
      */
+    @SuppressWarnings("UnusedDeclaration")
     public static boolean[][] createMarker(int ID) {
         // Check that value is within allowable range:
         if (ID > 255) {
@@ -58,6 +59,7 @@ public class MarkerPatternHelper {
      * @param pattern The pattern to check. Size must be 4x4!
      * @return Returns the corrected ID.
      */
+    @SuppressWarnings("UnusedDeclaration")
     public static int getID(final boolean[][] pattern) {
         boolean[] code = new boolean[12];
         // Extract code:
@@ -86,6 +88,7 @@ public class MarkerPatternHelper {
      * @param encoded The boolean array to encode. Must be 8 long!
      * @return The encoded array.
      */
+    @SuppressWarnings("UnusedDeclaration")
     private static boolean[] hammingCreation(boolean[] encoded) {
         boolean[] code = new boolean[12];
         // place word in code
@@ -113,6 +116,7 @@ public class MarkerPatternHelper {
      * @param code The 12 long bool array containing the full code.
      * @return The 8 long bool array containing the corrected decoded booleans.
      */
+    @SuppressWarnings("UnusedDeclaration")
     private static boolean[] hammingCorrection(boolean[] code) {
         boolean[] decoded = new boolean[8];
         // Check parity:
@@ -186,6 +190,7 @@ public class MarkerPatternHelper {
      * @param bool The array to convert. Length must be 8.
      * @return The number represented by it.
      */
+    @SuppressWarnings("UnusedDeclaration")
     private static int deBool(boolean[] bool) {
         int result = 0;
         for (int i = 0; i < 8; i++) {
@@ -201,6 +206,7 @@ public class MarkerPatternHelper {
      * @param number The number to convert.
      * @return The boolean array representing the number.
      */
+    @SuppressWarnings("UnusedDeclaration")
     private static boolean[] bool(int number) {
         boolean[] result = new boolean[8];
         for (int i = 0; i < 8; i++) {

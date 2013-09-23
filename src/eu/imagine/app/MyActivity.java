@@ -39,12 +39,24 @@ public class MyActivity extends Activity {
             1.0f, 0.0f, 1.0f, 0.5f
     };
 
+    // Camera matrix (here determined ahead of time)
+    private float[][] cameraMatrix = new float[][]{
+            new float[]{1279.170989993096f, 0f, 639.5f},
+            new float[]{0f, 1279.170989993096f, 359.5f},
+            new float[]{0f, 0f, 1f}
+    };
+    // Distortion coefficients:
+    private float[] distortionCoefficients = new float[]{
+            0.3226026655144f, -2.722492888428328f, 0f, 0f, 5.676717782925402f
+    };
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         // Construct framework and pass a suitable viewgroup where we want
         // the results to show.
-        framework = new MainInterface(this, (ViewGroup) findViewById(R.id.group));
+        framework = new MainInterface(this, (ViewGroup) findViewById(R.id
+                .group), cameraMatrix, distortionCoefficients);
         // Set some debugging flags:
         framework.setDebugFlag(Flags.DEBUG_LOGGING);
         framework.setDebugFlag(Flags.DEBUG_FRAME);

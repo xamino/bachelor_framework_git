@@ -42,6 +42,11 @@ class Detector {
     private final int step = MARKER_SIZE / MARKER_GRID;
     private final int half = step / 2;
 
+    // Camera calibration numbers, should be adapted for every device!
+    private ConvertHelper CONVERT;
+    private Mat camMatrix;
+    private Mat distCoeff;
+
     // Important reused vars
     private Mat out;
     private Mat compositeFrameOut;
@@ -68,8 +73,13 @@ class Detector {
                 new Point(0, 0),
                 new Point(MARKER_SIZE, 0), new Point(MARKER_SIZE, MARKER_SIZE));
         this.standardMarkerNormalized = new MatOfPoint2f();
-        this.standardMarkerNormalized.fromArray(new Point(0, 1),
-                new Point(0, 0), new Point(1, 0), new Point(1, 1));
+        this.standardMarkerNormalized.fromArray(new Point(0.5, -0.5),
+                new Point(-0.5, -0.5), new Point(-0.5, 0.5), new Point(0.5,
+                0.5));
+        // Set calibration things:
+        CONVERT = ConvertHelper.getInstance();
+        this.camMatrix = CONVERT.floatToMat(mainInterface.camMatrix);
+        this.distCoeff = CONVERT.floatToMat(mainInterface.distCoef);
         // Correctly set flags
         this.updateFlags();
     }
@@ -287,6 +297,7 @@ class Detector {
             return new Marker(result, tempPerspective, angle, id, pattern,
                     texture);
         }
+        log.log(TAG, "Test: " + result.dump());
         // Normal, faster return:
         return new Marker(tempPerspective, angle, id);
     }

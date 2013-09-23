@@ -33,6 +33,7 @@ public class MainInterface {
     private RenderInterface render;
     private Activity mainActivity;
     private ViewGroup groupView;
+    private ConvertHelper CONVERT;
     private final Object synLock = new Object();
 
     // Store markers per frame:
@@ -43,7 +44,12 @@ public class MainInterface {
     // Store Homography listeners:
     private ArrayList<HomographyListener> listeners;
 
-    public MainInterface(Activity mainActivity, ViewGroup groupView) {
+    // Values:
+    float[][] camMatrix;
+    float[] distCoef;
+
+    public MainInterface(Activity mainActivity, ViewGroup groupView,
+                         float[][] camMatrix, float[] distortionCoefficients) {
         this.log = Messenger.getInstance();
         log.log(TAG, "Constructing framework.");
         this.mainActivity = mainActivity;
@@ -54,6 +60,10 @@ public class MainInterface {
         this.listeners = new ArrayList<HomographyListener>();
         this.allTrackables = new ArrayList<Entity>();
         this.detectedTrackables = new ArrayList<Trackable>();
+        this.CONVERT = ConvertHelper.getInstance();
+        // Set camera matrix:
+        this.camMatrix = camMatrix;
+        this.distCoef = distortionCoefficients;
     }
 
     public void onCreate() {
@@ -257,7 +267,7 @@ public class MainInterface {
                         if (mark.getID() == tracking.getID()) {
                             // prepare OpenGL usable perspective matrix:
                             Mat per = mark.getPerspective();
-                            float[] perspective = new float[] {
+                            float[] perspective = new float[]{
                                     (float) per.get(0, 0)[0],
                                     (float) per.get(1, 0)[0],
                                     (float) per.get(2, 0)[0],
@@ -270,7 +280,7 @@ public class MainInterface {
                                     (float) per.get(1, 2)[0],
                                     (float) per.get(2, 2)[0],
                                     0,
-                                    0,0,0,0
+                                    0, 0, 0, 0
                             };
                             detectedTrackables.add(new Trackable(mark.getID(),
                                     perspective, tracking.getFloatBuffer()));
@@ -308,6 +318,7 @@ public class MainInterface {
     protected ArrayList<Trackable> getList() {
         synchronized (synLock) {
             updatedData = false;
+            //noinspection unchecked
             return (ArrayList<Trackable>) detectedTrackables.clone();
         }
     }
