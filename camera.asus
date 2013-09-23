@@ -1,0 +1,13 @@
+09-23 13:45:28.604: INFO/OCVSample::CameraCalibrator(6679): Average re-projection error: 0.269363
+09-23 13:45:28.604: INFO/OCVSample::CameraCalibrator(6679): Camera matrix:
+       [1279.170989993096, 0, 639.5;
+        0, 1279.170989993096, 359.5;
+        0, 0, 1]
+09-23 13:45:28.604: INFO/OCVSample::CameraCalibrator(6679): Distortion coefficients:
+       [0.3226026655144; -2.722492888428328; 0; 0; 5.676717782925402]
+09-23 13:45:28.664: INFO/OCVSample::CalibrationResult(6679): Saved camera matrix:
+       [1279.170989993096, 0, 639.5;
+        0, 1279.170989993096, 359.5;
+        0, 0, 1]
+09-23 13:45:28.664: INFO/OCVSample::CalibrationResult(6679): Saved distortion coefficients:
+       [0.3226026655144; -2.722492888428328; 0; 0; 5.676717782925402]
