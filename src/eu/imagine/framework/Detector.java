@@ -1,16 +1,10 @@
 package eu.imagine.framework;
 
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
-
-/**
- * Created with IntelliJ IDEA.
- * User: Tamino Hartmann
- * Date: 9/9/13
- * Time: 3:54 PM
- */
 
 /**
  * Class encapsulates the main work method, allowing a simpler view from
@@ -45,23 +39,30 @@ class Detector {
     // Camera calibration numbers, should be adapted for every device!
     private ConvertHelper CONVERT;
     private Mat camMatrix;
-    private Mat distCoeff;
+    private MatOfDouble distCoeff;
 
     // Important reused vars
-    private Mat out;
+    private Mat out, rotMat, Rvec, Tvec;
     private Mat compositeFrameOut;
     private ArrayList<MatOfPoint> contours, contoursAll;
     private ArrayList<Marker> markerCandidates;
-    private MatOfPoint2f result, standardMarker, standardMarkerNormalized;
+    private MatOfPoint2f result, standardMarker;
+    private MatOfPoint3f objectPoints;
 
     // Colors
     private final double[] WHITE = new double[]{255, 255, 255, 255};
     private final double[] BLACK = new double[]{0, 0, 0, 255};
 
+    /**
+     * @param mainInterface
+     */
     protected Detector(MainInterface mainInterface) {
         this.log = Messenger.getInstance();
         this.mainInterface = mainInterface;
         this.out = new Mat();
+        this.rotMat = new Mat();
+        this.Rvec = new Mat();
+        this.Tvec = new Mat();
         this.compositeFrameOut = new Mat();
         this.contours = new ArrayList<MatOfPoint>();
         this.contoursAll = new ArrayList<MatOfPoint>();
@@ -72,18 +73,24 @@ class Detector {
         this.standardMarker.fromArray(new Point(0, MARKER_SIZE),
                 new Point(0, 0),
                 new Point(MARKER_SIZE, 0), new Point(MARKER_SIZE, MARKER_SIZE));
-        this.standardMarkerNormalized = new MatOfPoint2f();
-        this.standardMarkerNormalized.fromArray(new Point(0.5, -0.5),
-                new Point(-0.5, -0.5), new Point(-0.5, 0.5), new Point(0.5,
-                0.5));
+        // Prepare standard 3d object points:
+        this.objectPoints = new MatOfPoint3f();
+        this.objectPoints.fromArray(new Point3(0.5f, -0.5f, 0f),
+                new Point3(-0.5f, -0.5f, 0f), new Point3(-0.5f, 0.5f, 0f),
+                new Point3(0.5f, 0.5f, 0f));
         // Set calibration things:
         CONVERT = ConvertHelper.getInstance();
-        this.camMatrix = CONVERT.floatToMat(mainInterface.camMatrix);
-        this.distCoeff = CONVERT.floatToMat(mainInterface.distCoef);
+        this.camMatrix = CONVERT.float2ToMatFloat(mainInterface.camMatrix);
+        this.distCoeff = CONVERT.float1ToMatDouble(mainInterface.distCoef);
         // Correctly set flags
         this.updateFlags();
     }
 
+    /**
+     * @param gray
+     * @param rgba
+     * @return
+     */
     protected Mat detect(Mat gray, Mat rgba) {
 
         if (MainInterface.DEBUG_FRAME_LOGGING)
@@ -143,19 +150,27 @@ class Detector {
             // speed: ~0ms
             Mat tempPerspective = Imgproc.getPerspectiveTransform(result,
                     standardMarker);
-            Mat inversePerspective = Imgproc.getPerspectiveTransform
-                    (standardMarkerNormalized, result);
             // Apply to get marker grayTexture
             // speed: ~12ms
             Imgproc.warpPerspective(rgba, out, tempPerspective,
                     new Size(MARKER_SIZE, MARKER_SIZE));
             // Check if marker
             // speed: ~9ms (range: 5ms to 30ms!)
-            Marker mark = isMarker(result, inversePerspective, out);
+            Marker mark = isMarker(result, out);
             if (mark == null)
                 continue;
             // Save marker candidate
             markerCandidates.add(mark);
+        }
+
+        // Now calculate the perspective transform for all markers:
+        // Speed: ~2ms per detected marker
+        for (Marker marker : markerCandidates) {
+            Calib3d.solvePnP(objectPoints, marker.getCorners(), camMatrix,
+                    distCoeff, Rvec, Tvec);
+            Calib3d.Rodrigues(Rvec, rotMat);
+            marker.setRotTranslation(CONVERT.matFloatToFloat2(rotMat),
+                    CONVERT.matToFloat1(Tvec));
         }
 
         if (DEBUG_POLY) {
@@ -228,8 +243,12 @@ class Detector {
         return compositeFrameOut;
     }
 
-    private Marker isMarker(MatOfPoint2f result, Mat tempPerspective,
-                            Mat texture) {
+    /**
+     * @param result
+     * @param texture
+     * @return
+     */
+    private Marker isMarker(MatOfPoint2f result, Mat texture) {
         boolean[][] pattern = new boolean[4][4];
 
         // reset error allowance
@@ -291,15 +310,16 @@ class Detector {
         // time: ~0ms
         int id = MarkerPatternHelper.getID(pattern);
 
+        Marker marker = new Marker(result, angle, id);
+
         // For debug, we need to remember the grayTexture, otherwise not.
         if (mainInterface.DEBUG_FRAME && (DEBUG_DRAW_MARKERS || DEBUG_POLY)) {
             // INFO: Debugging with this HALFS the framerate!
-            return new Marker(result, tempPerspective, angle, id, pattern,
-                    texture);
+            marker.setDebugParameters(pattern, texture);
+            return marker;
         }
-        log.log(TAG, "Test: " + result.dump());
-        // Normal, faster return:
-        return new Marker(tempPerspective, angle, id);
+
+        return marker;
     }
 
     /**

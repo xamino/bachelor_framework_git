@@ -9,13 +9,13 @@ class Trackable {
 
     private final FloatBuffer FLOATBUFFER;
     private final int ID;
-    private final float[] PERSPECTIVE;
+    private final float[][] TRANSLATION;
 
-    public Trackable(final int ID, final float[] PERSPECTIVE,
-                     final FloatBuffer FLOATBUFFER) {
+    public Trackable(final int ID,
+                     float[][] translation, final FloatBuffer FLOATBUFFER) {
         this.ID = ID;
-        this.PERSPECTIVE = PERSPECTIVE;
         this.FLOATBUFFER = FLOATBUFFER;
+        this.TRANSLATION = translation;
     }
 
     public String toString() {
@@ -26,7 +26,7 @@ class Trackable {
         return this.FLOATBUFFER;
     }
 
-    public float[] getPerspective() {
-        return PERSPECTIVE;
+    public float[][] getTRANSLATION() {
+        return this.TRANSLATION;
     }
 }

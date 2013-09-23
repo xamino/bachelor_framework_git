@@ -87,8 +87,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         if (!toRender.isEmpty()) {
             for (Trackable trackable : toRender) {
                 Matrix.setIdentityM(mModelMatrix, 0);
-                drawObject(trackable.getFloatbuffer(),
-                        trackable.getPerspective());
+                drawObject(trackable.getFloatbuffer(), trackable.getTRANSLATION());
             }
         }
         if (MainInterface.DEBUG_FRAME_LOGGING) {
@@ -118,10 +117,21 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
      * Method for painting any given object.
      *
      * @param data        The vertice data containing coordinates and colors to draw.
-     * @param perspective The matrix for correctly placing the object onto the marker.
+     * @param translation
      */
-    private void drawObject(final FloatBuffer data,
-                            final float[] perspective) {
+    private void drawObject(final FloatBuffer data, float[][] translation) {
+
+        /*
+        String out = "\n[";
+        for (int row = 0; row < translation.length; row++) {
+            for (int column = 0; column < translation[row].length; column++) {
+                out += translation[row][column] + ", ";
+            }
+            out += ";\n";
+        }
+        log.log(TAG, "Rendering:" + out + "]\n");
+        */
+
         // Pass in the position information
         data.position(mPositionOffset);
         GLES20.glVertexAttribPointer(mPositionHandle, mPositionDataSize, GLES20.GL_FLOAT, false,

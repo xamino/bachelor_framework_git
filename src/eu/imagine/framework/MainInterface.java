@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import org.opencv.android.JavaCameraView;
-import org.opencv.core.Mat;
 
 import java.util.ArrayList;
 
@@ -265,25 +264,9 @@ public class MainInterface {
                     for (Marker mark : markerCandidates) {
                         // Add to rendering:
                         if (mark.getID() == tracking.getID()) {
-                            // prepare OpenGL usable perspective matrix:
-                            Mat per = mark.getPerspective();
-                            float[] perspective = new float[]{
-                                    (float) per.get(0, 0)[0],
-                                    (float) per.get(1, 0)[0],
-                                    (float) per.get(2, 0)[0],
-                                    0,
-                                    (float) per.get(0, 1)[0],
-                                    (float) per.get(1, 1)[0],
-                                    (float) per.get(2, 1)[0],
-                                    0,
-                                    (float) per.get(0, 2)[0],
-                                    (float) per.get(1, 2)[0],
-                                    (float) per.get(2, 2)[0],
-                                    0,
-                                    0, 0, 0, 0
-                            };
                             detectedTrackables.add(new Trackable(mark.getID(),
-                                    perspective, tracking.getFloatBuffer()));
+                                    mark.getTranslation(),
+                                    tracking.getFloatBuffer()));
                             toRemove = mark;
                             break;
                         }

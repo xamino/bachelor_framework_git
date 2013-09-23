@@ -16,60 +16,44 @@ public class Marker {
      * Stores bool representation of pattern
      */
     private boolean[][] pattern;
+    /**
+     *
+     */
     protected Mat grayTexture;
     /**
      * Contains angle.
      */
     private int angle;
     /**
-     * Contains the perspective transform.
+     * The ID of the marker. Default is -1, which signifies that no ID has
+     * been assigned yet.
      */
-    private Mat markerPerspective;
+    private int id;
     /**
      * Contains the original corner coordinates.
      */
     private MatOfPoint2f originalCorners;
-    /**
-     * The ID of the marker. Default is -1, which signifies that no ID has
-     * been assigned yet.
-     */
-    private int id = -1;
+
+    private float[][] rotation;
+    private float[] translation;
+    private float[][] combined;
 
     /**
-     * Constructor. COPIES all values!
+     * Constructor – WARNING, NULL fields possible as some values are not set
+     * . Use setDebugParameters to set pattern and texture.
      *
-     * @param originalCorners
-     * @param markerPerspective
-     */
-    // TODO: Consider which values will really be needed on the OpenGL side
-    // and remove all others, as they only decrease speed!
-    public Marker(MatOfPoint2f originalCorners, Mat markerPerspective,
-                  int angle, int id, boolean[][] pattern, Mat grayTexture) {
-        this.id = id;
-        this.angle = angle;
-        this.pattern = pattern;
-        // MUST COPY ALL VALUES!
-        this.originalCorners = new MatOfPoint2f(originalCorners.toArray());
-        this.markerPerspective = markerPerspective.clone();
-        this.grayTexture = grayTexture.clone();
-    }
-
-    /**
-     * Faster constructor – WARNING, NULL fields possible as some are unused
-     * here!
-     *
-     * @param markerPerspective
      * @param angle
      * @param id
      */
-    public Marker(Mat markerPerspective,
-                  int angle, int id) {
+    public Marker(MatOfPoint2f corners, int angle, int id) {
         this.id = id;
         this.angle = angle;
-        this.markerPerspective = markerPerspective.clone();
-        this.pattern = null;
-        this.grayTexture = null;
-        this.originalCorners = null;
+        this.originalCorners = new MatOfPoint2f(corners.toArray());
+    }
+
+    protected void setDebugParameters(boolean[][] pattern, Mat grayTexture) {
+        this.grayTexture = grayTexture.clone();
+        this.pattern = pattern;
     }
 
     /**
@@ -78,10 +62,7 @@ public class Marker {
      * @return
      */
     protected MatOfPoint getMOPCorners() {
-        if (originalCorners == null)
-            return null;
-        else
-            return new MatOfPoint(originalCorners.toArray());
+        return new MatOfPoint(originalCorners.toArray());
     }
 
     protected boolean[][] getPattern() {
@@ -89,14 +70,34 @@ public class Marker {
     }
 
     public String toString() {
-        return "ID: "+id+" | angle: "+angle+"°";
+        return "ID: " + id + " | angle: " + angle + "°";
     }
 
     protected int getID() {
         return id;
     }
 
-    public Mat getPerspective() {
-        return markerPerspective;
+    protected MatOfPoint2f getCorners() {
+        return originalCorners;
+    }
+
+    protected void setRotTranslation(float[][] rotMat, float[] transVec) {
+        this.rotation = rotMat;
+        this.translation = transVec;
+    }
+
+    protected float[][] getTranslation() {
+        // If hasn't been calculated yet, do so:
+        if (combined == null) {
+            combined = new float[3][4];
+            for (int row = 0; row < 3; row++) {
+                // Copy rotation in:
+                for (int column = 0; column < 3; column++)
+                    combined[row][column] = rotation[row][column];
+                // Add translation on end:
+                combined[row][3] = translation[row];
+            }
+        }
+        return combined;
     }
 }

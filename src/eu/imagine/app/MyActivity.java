@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import eu.imagine.R;
-import eu.imagine.framework.Flags;
 import eu.imagine.framework.MainInterface;
 
 public class MyActivity extends Activity {
@@ -53,16 +52,19 @@ public class MyActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        // Construct framework and pass a suitable viewgroup where we want
-        // the results to show.
+        // Construct framework. This includes passing a reference to the
+        // activity (here this), the viewgroup where it'll construct its
+        // views, and the camera and distortioncoefficients.
         framework = new MainInterface(this, (ViewGroup) findViewById(R.id
                 .group), cameraMatrix, distortionCoefficients);
         // Set some debugging flags:
+        /*
         framework.setDebugFlag(Flags.DEBUG_LOGGING);
         framework.setDebugFlag(Flags.DEBUG_FRAME);
         framework.setDebugFlag(Flags.DEBUG_DRAW_MARKERS);
         framework.setDebugFlag(Flags.DEBUG_DRAW_MARKER_ID);
         framework.setDebugFlag(Flags.DEBUG_DRAW_SAMPLING);
+        */
         // Add some test entities:
         Tracking one = new Tracking(242, true, oneData);
         // Tracking two = new Tracking(42, true, twoData);
