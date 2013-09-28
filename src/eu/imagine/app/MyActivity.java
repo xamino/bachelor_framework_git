@@ -17,25 +17,14 @@ public class MyActivity extends Activity {
      * Example object to render. Format is 3 coords followed by 4 colors.
      */
     private float[] oneData = new float[]{
-            -0.5f, -0.25f, 0.0f,
+            -0.5f, -0.5f, 0.0f,
             1.0f, 0.0f, 0.0f, 1.0f,
 
-            0.5f, -0.25f, 0.0f,
+            0.5f, -0.5f, 0.0f,
             0.0f, 0.0f, 1.0f, 1.0f,
 
-            0.0f, 0.559016994f, 0.0f,
+            0.5f, 0.5f, 0.0f,
             0.0f, 1.0f, 0.0f, 1.0f
-    };
-
-    private float[] twoData = new float[]{
-            1f, -0.25f, 0.2f,
-            0.0f, 0.0f, 1.0f, 0.5f,
-
-            1f, 0.559016994f, 0.2f,
-            1.0f, 1.0f, 0.0f, 0.5f,
-
-            0.5f, -0.25f, 0.2f,
-            1.0f, 0.0f, 1.0f, 0.5f
     };
 
     // Camera matrix (here determined ahead of time)
@@ -61,10 +50,11 @@ public class MyActivity extends Activity {
         /*
         framework.setDebugFlag(Flags.DEBUG_LOGGING);
         framework.setDebugFlag(Flags.DEBUG_FRAME);
+        framework.setDebugFlag(Flags.DEBUG_POLY);
         framework.setDebugFlag(Flags.DEBUG_DRAW_MARKERS);
         framework.setDebugFlag(Flags.DEBUG_DRAW_MARKER_ID);
         framework.setDebugFlag(Flags.DEBUG_DRAW_SAMPLING);
-        */
+          */
         // Add some test entities:
         Tracking one = new Tracking(242, true, oneData);
         // Tracking two = new Tracking(42, true, twoData);

@@ -34,9 +34,7 @@ public class Marker {
      */
     private MatOfPoint2f originalCorners;
 
-    private float[][] rotation;
     private float[] translation;
-    private float[][] combined;
 
     /**
      * Constructor – WARNING, NULL fields possible as some values are not set
@@ -81,23 +79,11 @@ public class Marker {
         return originalCorners;
     }
 
-    protected void setRotTranslation(float[][] rotMat, float[] transVec) {
-        this.rotation = rotMat;
+    protected void setRotTranslation(float[] transVec) {
         this.translation = transVec;
     }
 
-    protected float[][] getTranslation() {
-        // If hasn't been calculated yet, do so:
-        if (combined == null) {
-            combined = new float[3][4];
-            for (int row = 0; row < 3; row++) {
-                // Copy rotation in:
-                for (int column = 0; column < 3; column++)
-                    combined[row][column] = rotation[row][column];
-                // Add translation on end:
-                combined[row][3] = translation[row];
-            }
-        }
-        return combined;
+    protected float[] getTranslation() {
+        return this.translation;
     }
 }

@@ -87,7 +87,11 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         if (!toRender.isEmpty()) {
             for (Trackable trackable : toRender) {
                 Matrix.setIdentityM(mModelMatrix, 0);
-                drawObject(trackable.getFloatbuffer(), trackable.getTRANSLATION());
+                float[] trans = trackable.getTRANSLATION();
+                // Trans must be inverted because we want the object to move
+                Matrix.invertM(trans, 0, trans, 0);
+                Matrix.multiplyMM(mModelMatrix, 0, trans, 0, mModelMatrix, 0);
+                drawObject(trackable.getFloatbuffer());
             }
         }
         if (MainInterface.DEBUG_FRAME_LOGGING) {
@@ -100,34 +104,36 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
 
-        // Create a new perspective projection matrix. The height will stay the same
-        // while the width will vary as per aspect ratio.
-        final float ratio = (float) width / height;
-        final float left = -ratio;
-        final float right = ratio;
-        final float bottom = -1.0f;
-        final float top = 1.0f;
-        final float near = 1.0f;
-        final float far = 10.0f;
+        float f_x = mainInterface.camMatrix[0][0];
+        float f_y = mainInterface.camMatrix[1][1];
+        float c_x = mainInterface.camMatrix[0][2];
+        float c_y = mainInterface.camMatrix[1][2];
 
-        Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
+        float fovY = 1f / (f_x / height * 2f);
+        float aspectRatio = width / height * f_y / f_x;
+        float near = 0.1f;  // Near clipping distance (0.1)
+        float far = 1000f;  // Far clipping distance  (1000)
+        float frustum_height = near * fovY;
+        float frustum_width = frustum_height * aspectRatio;
+
+        float offset_x = (width / 2f - c_x) / width * frustum_width * 2f;
+        float offset_y = (height / 2f - c_y) / height * frustum_height * 2f;
+
+        Matrix.frustumM(mProjectionMatrix, 0, -frustum_width - offset_x, frustum_width - offset_x,
+                -frustum_height - offset_y, frustum_height - offset_y, near, far);
     }
 
     /**
      * Method for painting any given object.
      *
-     * @param data        The vertice data containing coordinates and colors to draw.
-     * @param translation
+     * @param data The vertice data containing coordinates and colors to draw.
      */
-    private void drawObject(final FloatBuffer data, float[][] translation) {
+    private void drawObject(final FloatBuffer data) {
 
         /*
         String out = "\n[";
         for (int row = 0; row < translation.length; row++) {
-            for (int column = 0; column < translation[row].length; column++) {
-                out += translation[row][column] + ", ";
-            }
-            out += ";\n";
+            out += translation[row] + ", ";
         }
         log.log(TAG, "Rendering:" + out + "]\n");
         */

@@ -168,9 +168,25 @@ class Detector {
         for (Marker marker : markerCandidates) {
             Calib3d.solvePnP(objectPoints, marker.getCorners(), camMatrix,
                     distCoeff, Rvec, Tvec);
+            // Now to convert from OpenCV to OpenGL coordinates:
+            // Convert rotation:
+            Rvec.put(0, 1, Rvec.get(1, 0)[0] * -1.0f);
+            Rvec.put(0, 2, Rvec.get(2, 0)[0] * -1.0f);
+            // Calculate rotation matrix:
             Calib3d.Rodrigues(Rvec, rotMat);
-            marker.setRotTranslation(CONVERT.matFloatToFloat2(rotMat),
-                    CONVERT.matToFloat1(Tvec));
+            // Build OpenGL ready matrix:
+            float[] translation = new float[]{
+                    (float) rotMat.get(0, 0)[0], (float) rotMat.get(1, 0)[0],
+                    (float) rotMat.get(2, 0)[0], 0.0f,
+                    (float) rotMat.get(0, 1)[0], (float) rotMat.get(1, 1)[0],
+                    (float) rotMat.get(2, 1)[0], 0.0f,
+                    (float) rotMat.get(0, 2)[0], (float) rotMat.get(1, 2)[0],
+                    (float) rotMat.get(2, 2)[0], 0.0f,
+                    (float) Tvec.get(0, 0)[0], -(float) Tvec.get(1, 0)[0],
+                    -(float) Tvec.get(2, 0)[0], 1.0f
+            };
+
+            marker.setRotTranslation(translation);
         }
 
         if (DEBUG_POLY) {

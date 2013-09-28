@@ -9,10 +9,10 @@ class Trackable {
 
     private final FloatBuffer FLOATBUFFER;
     private final int ID;
-    private final float[][] TRANSLATION;
+    private final float[] TRANSLATION;
 
     public Trackable(final int ID,
-                     float[][] translation, final FloatBuffer FLOATBUFFER) {
+                     float[] translation, final FloatBuffer FLOATBUFFER) {
         this.ID = ID;
         this.FLOATBUFFER = FLOATBUFFER;
         this.TRANSLATION = translation;
@@ -26,7 +26,7 @@ class Trackable {
         return this.FLOATBUFFER;
     }
 
-    public float[][] getTRANSLATION() {
+    public float[] getTRANSLATION() {
         return this.TRANSLATION;
     }
 }
