@@ -7,9 +7,9 @@ import java.nio.FloatBuffer;
  */
 class Trackable {
 
-    private final FloatBuffer FLOATBUFFER;
-    private final int ID;
-    private final float[] TRANSLATION;
+    private FloatBuffer FLOATBUFFER;
+    private int ID;
+    private float[] TRANSLATION, INVERSE;
 
     public Trackable(final int ID,
                      float[] translation, final FloatBuffer FLOATBUFFER) {
@@ -28,5 +28,13 @@ class Trackable {
 
     public float[] getTRANSLATION() {
         return this.TRANSLATION;
+    }
+
+    public float[] getINVERSE() {
+        return INVERSE;
+    }
+
+    public void setInverse(float[] inverse) {
+        this.INVERSE = inverse;
     }
 }

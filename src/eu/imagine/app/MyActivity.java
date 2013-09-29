@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import eu.imagine.R;
+import eu.imagine.framework.Flags;
 import eu.imagine.framework.MainInterface;
 
 public class MyActivity extends Activity {
@@ -47,19 +48,18 @@ public class MyActivity extends Activity {
         framework = new MainInterface(this, (ViewGroup) findViewById(R.id
                 .group), cameraMatrix, distortionCoefficients);
         // Set some debugging flags:
-        /*
         framework.setDebugFlag(Flags.DEBUG_LOGGING);
         framework.setDebugFlag(Flags.DEBUG_FRAME);
+        // framework.setDebugFlag(Flags.DEBUG_PREP_FRAME);
         framework.setDebugFlag(Flags.DEBUG_POLY);
-        framework.setDebugFlag(Flags.DEBUG_DRAW_MARKERS);
-        framework.setDebugFlag(Flags.DEBUG_DRAW_MARKER_ID);
-        framework.setDebugFlag(Flags.DEBUG_DRAW_SAMPLING);
-          */
+        // framework.setDebugFlag(Flags.DEBUG_DRAW_MARKERS);
+        // framework.setDebugFlag(Flags.DEBUG_DRAW_MARKER_ID);
+        // framework.setDebugFlag(Flags.DEBUG_DRAW_SAMPLING);
         // Add some test entities:
         Tracking one = new Tracking(242, true, oneData);
-        // Tracking two = new Tracking(42, true, twoData);
+        Tracking two = new Tracking(9, true, oneData);
         framework.registerEntity(one);
-        // framework.registerEntity(two);
+        framework.registerEntity(two);
         // Call on create:
         framework.onCreate();
     }

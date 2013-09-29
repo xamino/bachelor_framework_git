@@ -30,8 +30,8 @@ class Detector {
     private final int MARKER_GRID = 6;
     private final int MARKER_SQUARE = 5;
     private final int MARKER_SIZE = MARKER_GRID * MARKER_SQUARE;
-    private final int RENDER_SCALE = 3;
-    private final int BINARY_THRESHOLD = 80;
+    // TODO: make modifiable
+    private final int BINARY_THRESHOLD = 100;
     private final int SAMPLE_THRESHOLD = (MARKER_SQUARE * MARKER_SQUARE) / 2;
     private final int step = MARKER_SIZE / MARKER_GRID;
     private final int half = step / 2;
@@ -99,6 +99,7 @@ class Detector {
         contoursAll.clear();
         markerCandidates = new ArrayList<Marker>();
 
+        // TODO: Check availability of flags & best defaults
         if (USE_CANNY) {
             Imgproc.Canny(gray, out, 50, 150);
         } else if (USE_ADAPTIVE) {
@@ -197,6 +198,7 @@ class Detector {
 
         if ((DEBUG_DRAW_MARKERS || DEBUG_DRAW_MARKER_ID) && !markerCandidates
                 .isEmpty()) {
+            int RENDER_SCALE = 3;
             if (DEBUG_DRAW_MARKERS) {
                 int count = 0;
                 for (Marker mark : markerCandidates) {

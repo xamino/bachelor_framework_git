@@ -86,11 +86,9 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         // ------------------------ RENDER ------------------------
         if (!toRender.isEmpty()) {
             for (Trackable trackable : toRender) {
+                // Reset model matrix to identity
                 Matrix.setIdentityM(mModelMatrix, 0);
-                float[] trans = trackable.getTRANSLATION();
-                // Trans must be inverted because we want the object to move
-                Matrix.invertM(trans, 0, trans, 0);
-                Matrix.multiplyMM(mModelMatrix, 0, trans, 0, mModelMatrix, 0);
+                Matrix.multiplyMM(mModelMatrix, 0, trackable.getTRANSLATION(), 0, mModelMatrix, 0);
                 drawObject(trackable.getFloatbuffer());
             }
         }
@@ -128,15 +126,9 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
      *
      * @param data The vertice data containing coordinates and colors to draw.
      */
+    // TODO: Make data always define object one triangle at a time (so always
+    // three sets of vertices define one tri)
     private void drawObject(final FloatBuffer data) {
-
-        /*
-        String out = "\n[";
-        for (int row = 0; row < translation.length; row++) {
-            out += translation[row] + ", ";
-        }
-        log.log(TAG, "Rendering:" + out + "]\n");
-        */
 
         // Pass in the position information
         data.position(mPositionOffset);
