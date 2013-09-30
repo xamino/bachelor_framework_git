@@ -1,5 +1,7 @@
 package eu.imagine.framework;
 
+// TODO: Comment!
+
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
@@ -99,10 +101,10 @@ class Detector {
         contoursAll.clear();
         markerCandidates = new ArrayList<Marker>();
 
-        // TODO: Check availability of flags & best defaults
         if (USE_CANNY) {
             Imgproc.Canny(gray, out, 50, 150);
         } else if (USE_ADAPTIVE) {
+            // speed: ~88ms
             Imgproc.adaptiveThreshold(gray, out, 255,
                     Imgproc.ADAPTIVE_THRESH_MEAN_C,
                     Imgproc.THRESH_BINARY, 81, 7);
@@ -134,8 +136,8 @@ class Detector {
             return compositeFrameOut;
         }
 
-        // Get all 4-vertice polygons from contours:
-        // Speed: ~330ms
+        // Do candidate processing:
+        // Speed: ~100ms for one marker (+- 50ms)
         for (MatOfPoint contour : contours) {
             MatOfPoint2f input = new MatOfPoint2f(contour.toArray());
             // speed: ~2ms
@@ -151,7 +153,7 @@ class Detector {
             // speed: ~0ms
             Mat tempPerspective = Imgproc.getPerspectiveTransform(result,
                     standardMarker);
-            // Apply to get marker grayTexture
+            // Apply to get marker texture
             // speed: ~12ms
             Imgproc.warpPerspective(rgba, out, tempPerspective,
                     new Size(MARKER_SIZE, MARKER_SIZE));

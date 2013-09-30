@@ -41,6 +41,11 @@ public enum Flags {
      */
     USE_CANNY,
     /**
+     * Use the adaptive thresholding for creating the initial binary image.
+     * Slower but less sensitive to luminance variations.
+     */
+    USE_ADAPTIVE,
+    /**
      * Show result of binarization. WARNING: No marker detection done!
      */
     DEBUG_PREP_FRAME,

@@ -49,17 +49,17 @@ public class MyActivity extends Activity {
                 .group), cameraMatrix, distortionCoefficients);
         // Set some debugging flags:
         framework.setDebugFlag(Flags.DEBUG_LOGGING);
-        framework.setDebugFlag(Flags.DEBUG_FRAME);
+        // framework.setDebugFlag(Flags.DEBUG_FRAME);
         // framework.setDebugFlag(Flags.DEBUG_PREP_FRAME);
-        framework.setDebugFlag(Flags.DEBUG_POLY);
+        // framework.setDebugFlag(Flags.DEBUG_POLY);
         // framework.setDebugFlag(Flags.DEBUG_DRAW_MARKERS);
         // framework.setDebugFlag(Flags.DEBUG_DRAW_MARKER_ID);
         // framework.setDebugFlag(Flags.DEBUG_DRAW_SAMPLING);
         // Add some test entities:
-        Tracking one = new Tracking(242, true, oneData);
-        Tracking two = new Tracking(9, true, oneData);
-        framework.registerEntity(one);
-        framework.registerEntity(two);
+        // Tracking one = new Tracking(242, true, oneData);
+        // Tracking two = new Tracking(9, true, oneData);
+        // framework.registerEntity(one);
+        // framework.registerEntity(two);
         // Call on create:
         framework.onCreate();
     }

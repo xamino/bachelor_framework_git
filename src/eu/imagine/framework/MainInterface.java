@@ -209,6 +209,9 @@ public class MainInterface {
             case USE_CANNY:
                 Detector.USE_CANNY = bool;
                 break;
+            case USE_ADAPTIVE:
+                Detector.USE_ADAPTIVE = bool;
+                break;
             case DEBUG_PREP_FRAME:
                 Detector.DEBUG_PREP_FRAME = bool;
                 break;
