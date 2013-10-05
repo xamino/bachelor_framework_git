@@ -63,7 +63,7 @@ public class Marker {
         return new MatOfPoint(originalCorners.toArray());
     }
 
-    protected boolean[][] getPattern() {
+    public boolean[][] getPattern() {
         return this.pattern;
     }
 
@@ -71,7 +71,7 @@ public class Marker {
         return "ID: " + id + " | angle: " + angle + "°";
     }
 
-    protected int getID() {
+    public int getID() {
         return id;
     }
 
@@ -83,7 +83,7 @@ public class Marker {
         this.translation = transVec;
     }
 
-    protected float[] getTranslation() {
+    public float[] getTranslation() {
         return this.translation;
     }
 }

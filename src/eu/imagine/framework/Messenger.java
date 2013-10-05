@@ -2,10 +2,7 @@ package eu.imagine.framework;
 
 import android.util.Log;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,6 +23,7 @@ class Messenger {
      * The stack with which the TimerResult objects are managed.
      */
     private HashMap<Object, Stack<TimerResult>> timers;
+    private ArrayList<MessageInterface> listeners;
 
     /**
      * Method to return the singleton instance of Messenger.
@@ -44,6 +42,7 @@ class Messenger {
      */
     private Messenger() {
         this.timers = new HashMap<Object, Stack<TimerResult>>();
+        this.listeners = new ArrayList<MessageInterface>();
     }
 
     /**
@@ -53,6 +52,7 @@ class Messenger {
      * @param content The content of the message to log.
      */
     protected synchronized void log(final String tag, final String content) {
+        sendMessage("Messenger|"+tag+" :log: "+content);
         Log.i("Messenger|" + tag, content);
     }
 
@@ -64,6 +64,7 @@ class Messenger {
      * @param content The content of the message to log.
      */
     protected synchronized void debug(final String tag, final String content) {
+        sendMessage("Messenger|"+tag+" :debug: "+content);
         if (MainInterface.DEBUG_LOGGING)
             Log.d("Messenger|" + tag, content);
     }
@@ -120,5 +121,30 @@ class Messenger {
         } else {
             return new TimerResult(-1, "OBJECT HAS NO STACK");
         }
+    }
+
+    /**
+     * Sends a string to all listeners.
+     * @param msg The complete message to send.
+     */
+    private void sendMessage(String msg) {
+        for (MessageInterface listener : listeners)
+            listener.notify(msg);
+    }
+
+    /**
+     * Method for registering a listener for log and debug messages.
+     * @param object The object to register.
+     */
+    public void registerListener(MessageInterface object) {
+        listeners.add(object);
+    }
+
+    /**
+     * Method for removing a listener for log and debug messages.
+     * @param object The object to remove.
+     */
+    public void removeListener(MessageInterface object) {
+        listeners.remove(object);
     }
 }

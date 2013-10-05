@@ -4,7 +4,7 @@ package eu.imagine.framework;
  * Helper class for generating possible markers and for decoding detected
  * markers.
  */
-public class MarkerPatternHelper {
+class MarkerPatternHelper {
 
     private static Messenger log = Messenger.getInstance();
     private static String TAG = "MarkerPatternHelper";
@@ -17,7 +17,7 @@ public class MarkerPatternHelper {
      *         including coded ID, coded direction, and borders.
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static boolean[][] createMarker(int ID) {
+    protected static boolean[][] createMarker(int ID) {
         // Check that value is within allowable range:
         if (ID > 255) {
             log.debug(TAG, "ID too large, exceeds maximum!");
@@ -60,7 +60,7 @@ public class MarkerPatternHelper {
      * @return Returns the corrected ID.
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static int getID(final boolean[][] pattern) {
+    protected static int getID(final boolean[][] pattern) {
         boolean[] code = new boolean[12];
         // Extract code:
         code[0] = pattern[0][1];

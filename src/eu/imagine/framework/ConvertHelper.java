@@ -10,13 +10,13 @@ import org.opencv.core.MatOfDouble;
  * Date: 9/23/13
  * Time: 2:20 PM
  */
-public class ConvertHelper {
+class ConvertHelper {
 
     private static ConvertHelper INSTANCE;
     private Messenger log;
     private final String TAG = "Converter";
 
-    public static ConvertHelper getInstance() {
+    protected static ConvertHelper getInstance() {
         if (INSTANCE == null)
             INSTANCE = new ConvertHelper();
         return INSTANCE;
@@ -30,7 +30,7 @@ public class ConvertHelper {
      * @param array
      * @return
      */
-    public Mat float2ToMatFloat(final float[][] array) {
+    protected Mat float2ToMatFloat(final float[][] array) {
         Mat retMat = new Mat(array.length, array[0].length, CvType.CV_32F);
         for (int row = 0; row < array.length; row++)
             for (int column = 0; column < array[row].length; column++) {
@@ -43,7 +43,7 @@ public class ConvertHelper {
      * @param array
      * @return
      */
-    public MatOfDouble float1ToMatDouble(final float[] array) {
+    protected MatOfDouble float1ToMatDouble(final float[] array) {
         MatOfDouble retMat = new MatOfDouble();
         for (int i = 0; i < array.length; i++)
             retMat.put(0, i, array[i]);
@@ -54,7 +54,7 @@ public class ConvertHelper {
      * @param mat
      * @return
      */
-    public float[][] matFloatToFloat2(Mat mat) {
+    protected float[][] matFloatToFloat2(Mat mat) {
         int height = (int) mat.size().height;
         int width = (int) mat.size().width;
         float[][] retFloat = new float[height][width];
@@ -69,7 +69,7 @@ public class ConvertHelper {
      * @param mat
      * @return
      */
-    public float[] matToFloat1(Mat mat) {
+    protected float[] matToFloat1(Mat mat) {
         int width = (int) mat.size().width;
         int height = (int) mat.size().height;
         if (width > height && height == 1) {
