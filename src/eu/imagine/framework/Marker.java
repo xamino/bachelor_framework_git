@@ -30,6 +30,10 @@ public class Marker {
      */
     private int id;
     /**
+     * Area of marker.
+     */
+    private int area;
+    /**
      * Contains the original corner coordinates.
      */
     private MatOfPoint2f originalCorners;
@@ -85,5 +89,13 @@ public class Marker {
 
     public float[] getTranslation() {
         return this.translation;
+    }
+
+    public void setArea(int area) {
+        this.area = area;
+    }
+
+    public int getArea() {
+        return this.area;
     }
 }

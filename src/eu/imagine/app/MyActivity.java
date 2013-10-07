@@ -48,10 +48,12 @@ public class MyActivity extends Activity {
         framework = new MainInterface(this, (ViewGroup) findViewById(R.id
                 .group), cameraMatrix, distortionCoefficients);
         // Set some debugging flags:
-        // framework.setDebugFlag(Flags.DEBUG_LOGGING);
+        // framework.allowUncertainHamming();
+        framework.setDebugFlag(Flags.DEBUG_LOGGING);
         framework.setDebugFlag(Flags.DEBUG_FRAME);
-        // framework.setDebugFlag(Flags.DEBUG_PREP_FRAME);
-        framework.setDebugFlag(Flags.DEBUG_POLY);
+        framework.setDebugFlag(Flags.USE_CANNY);
+        // framework.setDebugFlag(Flags.DEBUG_CONTOURS);
+        // framework.setDebugFlag(Flags.DEBUG_POLY);
         framework.setDebugFlag(Flags.DEBUG_DRAW_MARKERS);
         framework.setDebugFlag(Flags.DEBUG_DRAW_MARKER_ID);
         framework.setDebugFlag(Flags.DEBUG_DRAW_SAMPLING);

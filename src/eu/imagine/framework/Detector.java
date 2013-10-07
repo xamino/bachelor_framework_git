@@ -1,7 +1,5 @@
 package eu.imagine.framework;
 
-// TODO: Comment!
-
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
@@ -32,14 +30,11 @@ class Detector {
     private final int MARKER_GRID = 6;
     private final int MARKER_SQUARE = 5;
     private final int MARKER_SIZE = MARKER_GRID * MARKER_SQUARE;
-    // TODO: make modifiable
-    private final int BINARY_THRESHOLD = 100;
+    private int BINARY_THRESHOLD;
     private final int SAMPLE_THRESHOLD = (MARKER_SQUARE * MARKER_SQUARE) / 2;
     private final int step = MARKER_SIZE / MARKER_GRID;
     private final int half = step / 2;
 
-    // Camera calibration numbers, should be adapted for every device!
-    private ConvertHelper CONVERT;
     private Mat camMatrix;
     private MatOfDouble distCoeff;
 
@@ -56,7 +51,10 @@ class Detector {
     private final double[] BLACK = new double[]{0, 0, 0, 255};
 
     /**
-     * @param mainInterface
+     * Constructor of Detector.
+     *
+     * @param mainInterface The MainInterface instance; used for getting
+     *                      values.
      */
     protected Detector(MainInterface mainInterface) {
         this.log = Messenger.getInstance();
@@ -81,17 +79,20 @@ class Detector {
                 new Point3(-0.5f, -0.5f, 0f), new Point3(-0.5f, 0.5f, 0f),
                 new Point3(0.5f, 0.5f, 0f));
         // Set calibration things:
-        CONVERT = ConvertHelper.getInstance();
+        ConvertHelper CONVERT = ConvertHelper.getInstance();
         this.camMatrix = CONVERT.float2ToMatFloat(mainInterface.camMatrix);
         this.distCoeff = CONVERT.float1ToMatDouble(mainInterface.distCoef);
+        this.BINARY_THRESHOLD = mainInterface.threshold;
         // Correctly set flags
         this.updateFlags();
     }
 
     /**
-     * @param gray
-     * @param rgba
-     * @return
+     * Main method where OpenCV detects the markers.
+     *
+     * @param gray Grayscale mat.
+     * @param rgba RGBA mat.
+     * @return The rgba mat with any debugging stuff drawn on it.
      */
     protected Mat detect(Mat gray, Mat rgba) {
 
@@ -102,13 +103,15 @@ class Detector {
         markerCandidates = new ArrayList<Marker>();
 
         if (USE_CANNY) {
-            Imgproc.Canny(gray, out, 50, 150);
+            // best
+            Imgproc.Canny(gray, out, BINARY_THRESHOLD - 50, BINARY_THRESHOLD + 50);
         } else if (USE_ADAPTIVE) {
             // speed: ~88ms
             Imgproc.adaptiveThreshold(gray, out, 255,
                     Imgproc.ADAPTIVE_THRESH_MEAN_C,
-                    Imgproc.THRESH_BINARY, 81, 7);
+                    Imgproc.THRESH_BINARY, 7, 7);
         } else {
+            // Standard
             // Speed: ~8ms
             Imgproc.threshold(gray, out, BINARY_THRESHOLD, 255, Imgproc.THRESH_BINARY);
         }
@@ -124,8 +127,9 @@ class Detector {
         // Remove too small contours:
         // Speed: ~0ms
         for (MatOfPoint contour : contoursAll) {
-            if (contour.total() > 200)
-                contours.add(contour);
+            if (contour.total() <= 300)
+                continue;
+            contours.add(contour);
         }
 
         compositeFrameOut = rgba;
@@ -162,9 +166,31 @@ class Detector {
             Marker mark = isMarker(result, out);
             if (mark == null)
                 continue;
+            // Save area
+            int area = (int) Imgproc.contourArea(contour);
+            mark.setArea(area);
             // Save marker candidate
             markerCandidates.add(mark);
         }
+
+        // Remove double markers that arise from using Canny or adaptive
+        // threshold (inside & outside contour are found,
+        // we remove inside to keep only one contour)
+        ArrayList<Marker> toRemove = new ArrayList<Marker>();
+        for (int i = 0; i < markerCandidates.size(); i++) {
+            Marker mark = markerCandidates.get(i);
+            for (int j = i + 1; j < markerCandidates.size(); j++) {
+                Marker two = markerCandidates.get(j);
+                if (!markersClose(mark, two))
+                    continue;
+                if (mark.getArea() > two.getArea())
+                    toRemove.add(two);
+                else
+                    toRemove.add(mark);
+            }
+        }
+        for (Marker mark : toRemove)
+            markerCandidates.remove(mark);
 
         // Now calculate the perspective transform for all markers:
         // Speed: ~2ms per detected marker
@@ -264,9 +290,29 @@ class Detector {
     }
 
     /**
-     * @param result
-     * @param texture
-     * @return
+     * Checks if two markers have all corners close to each other.
+     *
+     * @param one Marker one.
+     * @param two Marker two.
+     * @return True if close.
+     */
+    private boolean markersClose(Marker one, Marker two) {
+        if (one.getID() == two.getID()) {
+            if (one.getArea() - two.getArea() < 20 || one.getArea() - two.getArea
+                    () > -20) {
+                log.debug(TAG, "Removing double marker! ID: " + one.getID());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Tries to read the texture to detect a marker.
+     *
+     * @param result  Points to write into marker, if detected.
+     * @param texture The texture to check.
+     * @return Marker object if marker was detected, else null.
      */
     private Marker isMarker(MatOfPoint2f result, Mat texture) {
         boolean[][] pattern = new boolean[4][4];
@@ -290,6 +336,7 @@ class Detector {
 
         // we'll allow 4 incorrect border pieces but no more
         if (errorAllowance > 4 && !DEBUG_DRAW_MARKER_ID && !DEBUG_DRAW_MARKERS) {
+            log.debug(TAG, "Discarding over incomplete border detection!");
             return null;
         }
         // Now read pattern:
@@ -321,6 +368,7 @@ class Detector {
         } else {
             // This happens when a black border is found but has no
             // orientation information.
+            log.debug(TAG, "Discarding over missing orientation information!");
             angle = -1;
             if (!DEBUG_DRAW_MARKER_ID && !DEBUG_DRAW_MARKERS)
                 return null;
@@ -329,6 +377,12 @@ class Detector {
         // Get Hamming code corrected id:
         // time: ~0ms
         int id = MarkerPatternHelper.getID(pattern);
+
+        // Check if id is valid.
+        if (id < 0) {
+            log.debug(TAG, "Discarding over illegal ID!");
+            return null;
+        }
 
         Marker marker = new Marker(result, angle, id);
 

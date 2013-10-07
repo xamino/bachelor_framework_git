@@ -8,6 +8,7 @@ class MarkerPatternHelper {
 
     private static Messenger log = Messenger.getInstance();
     private static String TAG = "MarkerPatternHelper";
+    protected static boolean hammingDeforce = false;
 
     /**
      * Function to create the marker for a given ID.
@@ -77,7 +78,7 @@ class MarkerPatternHelper {
         code[11] = pattern[3][2];
 
         // Return (hopefully) corrected code:
-        return deBool(hammingCorrection(code));
+        return hammingCorrection(code);
     }
 
 
@@ -117,7 +118,7 @@ class MarkerPatternHelper {
      * @return The 8 long bool array containing the corrected decoded booleans.
      */
     @SuppressWarnings("UnusedDeclaration")
-    private static boolean[] hammingCorrection(boolean[] code) {
+    private static int hammingCorrection(boolean[] code) {
         boolean[] decoded = new boolean[8];
         // Check parity:
         int errorZero = -1;
@@ -147,18 +148,18 @@ class MarkerPatternHelper {
         decoded[7] = code[11];
         // If no error:
         if (errorZero < 0 && errorOne < 0 && errorThree < 0 && errorSeven < 0)
-            return decoded;
+            return deBool(decoded);
         // ---- ERROR ----
         log.debug(TAG, "Error in ID, trying correction...");
         // Check for parity bit error (--> only one error)
         if (errorZero == 0 && errorOne < 0 && errorThree < 0 && errorSeven < 0)
-            return decoded;
+            return deBool(decoded);
         if (errorZero < 0 && errorOne == 1 && errorThree < 0 && errorSeven < 0)
-            return decoded;
+            return deBool(decoded);
         if (errorZero < 0 && errorOne < 0 && errorThree == 3 && errorSeven < 0)
-            return decoded;
+            return deBool(decoded);
         if (errorZero < 0 && errorOne < 0 && errorThree < 0 && errorSeven == 7)
-            return decoded;
+            return deBool(decoded);
         // Data error
         log.debug(TAG, "WARNING: correction uncertain!");
         // Uncertain because when 2 or more bits are wrong we can't detect
@@ -168,20 +169,13 @@ class MarkerPatternHelper {
                 0 ? 0 : 4) + (errorSeven < 0 ? 0 : 8);
         index--;
         // This can happen when more than one error happened:
-        if (index >= code.length)
+        if (index >= code.length) {
             log.debug(TAG, "WARNING: Hamming failed to correct!");
-        else
+            if (!hammingDeforce)
+                return -1;
+        } else
             code[index] = !code[index];
-        // decode
-        decoded[0] = code[2];
-        decoded[1] = code[4];
-        decoded[2] = code[5];
-        decoded[3] = code[6];
-        decoded[4] = code[8];
-        decoded[5] = code[9];
-        decoded[6] = code[10];
-        decoded[7] = code[11];
-        return decoded;
+        return deBool(decoded);
     }
 
     /**

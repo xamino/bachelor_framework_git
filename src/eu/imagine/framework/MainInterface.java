@@ -47,6 +47,9 @@ public class MainInterface {
     float[][] camMatrix;
     float[] distCoef;
 
+    // Detector values
+    protected int threshold = 100;
+
     public MainInterface(Activity mainActivity, ViewGroup groupView,
                          float[][] camMatrix, float[] distortionCoefficients) {
         this.log = Messenger.getInstance();
@@ -113,6 +116,25 @@ public class MainInterface {
         if (RUN_OPENCV)
             opencv.onDestroy();
         log.log(TAG, "Stopping.");
+    }
+
+    /**
+     * Method for modifying the binary threshold for Detector. Only use after
+     * checking with DEBUG_PREP_FRAME if the binarization actually is the
+     * error! Used to set all 3 binarization methods, including Canny!
+     *
+     * @param value The value to set it to.
+     */
+    public void setBinaryThreshold(int value) {
+        this.threshold = value;
+    }
+
+    /**
+     * Call this method to allow markers to be detected where the Hamming
+     * encoding is uncertain. Normally, these are discarded.
+     */
+    public void allowUncertainHamming() {
+        MarkerPatternHelper.hammingDeforce = true;
     }
 
     /**
