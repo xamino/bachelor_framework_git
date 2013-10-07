@@ -32,7 +32,6 @@ public class MainInterface {
     private RenderInterface render;
     private Activity mainActivity;
     private ViewGroup groupView;
-    private ConvertHelper CONVERT;
     private final Object synLock = new Object();
 
     // Store markers per frame:
@@ -62,7 +61,6 @@ public class MainInterface {
         this.listeners = new ArrayList<HomographyListener>();
         this.allTrackables = new ArrayList<Entity>();
         this.detectedTrackables = new ArrayList<Trackable>();
-        this.CONVERT = ConvertHelper.getInstance();
         // Set camera matrix:
         this.camMatrix = camMatrix;
         this.distCoef = distortionCoefficients;
@@ -125,6 +123,7 @@ public class MainInterface {
      *
      * @param value The value to set it to.
      */
+    @SuppressWarnings("UnusedDeclaration")
     public void setBinaryThreshold(int value) {
         this.threshold = value;
     }
@@ -133,6 +132,7 @@ public class MainInterface {
      * Call this method to allow markers to be detected where the Hamming
      * encoding is uncertain. Normally, these are discarded.
      */
+    @SuppressWarnings("UnusedDeclaration")
     public void allowUncertainHamming() {
         MarkerPatternHelper.hammingDeforce = true;
     }
@@ -186,7 +186,7 @@ public class MainInterface {
      * @param value The flag to set true.
      */
     @SuppressWarnings("UnusedDeclaration")
-    public void setDebugFlag(Flags value) {
+    public void setFlag(Flags value) {
         setFlag(value, true);
     }
 

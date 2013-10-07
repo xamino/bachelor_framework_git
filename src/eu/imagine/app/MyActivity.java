@@ -49,14 +49,15 @@ public class MyActivity extends Activity {
                 .group), cameraMatrix, distortionCoefficients);
         // Set some debugging flags:
         // framework.allowUncertainHamming();
-        framework.setDebugFlag(Flags.DEBUG_LOGGING);
-        framework.setDebugFlag(Flags.DEBUG_FRAME);
-        framework.setDebugFlag(Flags.USE_CANNY);
-        // framework.setDebugFlag(Flags.DEBUG_CONTOURS);
-        // framework.setDebugFlag(Flags.DEBUG_POLY);
-        framework.setDebugFlag(Flags.DEBUG_DRAW_MARKERS);
-        framework.setDebugFlag(Flags.DEBUG_DRAW_MARKER_ID);
-        framework.setDebugFlag(Flags.DEBUG_DRAW_SAMPLING);
+        // framework.setFlag(Flags.DEBUG_LOGGING);
+        framework.setFlag(Flags.DEBUG_FRAME);
+        framework.setFlag(Flags.USE_CANNY);
+        // framework.setFlag(Flags.DEBUG_PREP_FRAME);
+        // framework.setFlag(Flags.DEBUG_CONTOURS);
+        // framework.setFlag(Flags.DEBUG_POLY);
+        framework.setFlag(Flags.DEBUG_DRAW_MARKERS);
+        framework.setFlag(Flags.DEBUG_DRAW_MARKER_ID);
+        framework.setFlag(Flags.DEBUG_DRAW_SAMPLING);
         // Add some test entities:
         // Tracking one = new Tracking(242, true, oneData);
         // Tracking two = new Tracking(9, true, oneData);
