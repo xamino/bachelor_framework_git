@@ -21,6 +21,7 @@ public class MainInterface {
     protected static boolean DEBUG_LOGGING = false;
     protected static boolean DEBUG_FRAME_LOGGING = false;
     protected boolean ONLY_HOMOGRAPHY = false;
+    protected boolean ALLOW_DUPLICATE_MARKERS = false;
     protected boolean RUN_OPENCV = true;
     protected boolean RUN_RENDERER = true;
     protected boolean DEBUG_FRAME = false;
@@ -31,7 +32,6 @@ public class MainInterface {
     private OpenCVInterface opencv;
     private RenderInterface render;
     private Activity mainActivity;
-    private ViewGroup groupView;
     private final Object synLock = new Object();
 
     // Store markers per frame:
@@ -49,15 +49,11 @@ public class MainInterface {
     // Detector values
     protected int threshold = 100;
 
-    public MainInterface(Activity mainActivity, ViewGroup groupView,
+    public MainInterface(Activity mainActivity,
                          float[][] camMatrix, float[] distortionCoefficients) {
         this.log = Messenger.getInstance();
         log.log(TAG, "Constructing framework.");
         this.mainActivity = mainActivity;
-        // Sanity check:
-        if (groupView == null)
-            log.log(TAG, "Framework will crash, groupView is NULL!");
-        this.groupView = groupView;
         this.listeners = new ArrayList<HomographyListener>();
         this.allTrackables = new ArrayList<Entity>();
         this.detectedTrackables = new ArrayList<Trackable>();
@@ -66,7 +62,7 @@ public class MainInterface {
         this.distCoef = distortionCoefficients;
     }
 
-    public void onCreate() {
+    public void onCreate(ViewGroup groupView) {
         log.pushTimer(this, "start");
         // Create OpenCV part:
         if (RUN_OPENCV) {
@@ -181,34 +177,17 @@ public class MainInterface {
     }
 
     /**
-     * Method for setting debug flags.
-     *
-     * @param value The flag to set true.
-     */
-    @SuppressWarnings("UnusedDeclaration")
-    public void setFlag(Flags value) {
-        setFlag(value, true);
-    }
-
-    /**
-     * Method for removing debug flags.
-     *
-     * @param value The flag to set to false.
-     */
-    @SuppressWarnings("UnusedDeclaration")
-    public void removeDebugFlag(Flags value) {
-        setFlag(value, false);
-    }
-
-    /**
      * Helper function for setting flags.
      *
      * @param value The flag to set.
      * @param bool  The value to set that flag at.
      */
     @SuppressWarnings("UnusedDeclaration")
-    private void setFlag(Flags value, boolean bool) {
+    public void setFlag(Flags value, boolean bool) {
         switch (value) {
+            case ALLOW_DUPLICATE_MARKERS:
+                this.ALLOW_DUPLICATE_MARKERS = bool;
+                break;
             case ONLY_HOMOGRAPHY:
                 this.RUN_RENDERER = !bool;
                 this.ONLY_HOMOGRAPHY = bool;
@@ -284,21 +263,18 @@ public class MainInterface {
                     // Check if we want to render it:
                     if (!tracking.getVisibility())
                         continue;
-                    // Now add it to the renderTrackable list if marker found:
-                    Marker toRemove = null;
-                    for (Marker mark : markerCandidates) {
+
+                    for (Marker mark : markerCandidates)
                         // Add to rendering:
                         if (mark.getID() == tracking.getID()) {
                             detectedTrackables.add(new Trackable(mark.getID(),
                                     mark.getTranslation(),
                                     tracking.getFloatBuffer()));
-                            toRemove = mark;
-                            break;
+                            // Simply continue with next entity if we don't
+                            // want multiple renders:
+                            if (!ALLOW_DUPLICATE_MARKERS)
+                                break;
                         }
-                    }
-                    // Remove marker for performance reasons
-                    if (toRemove != null)
-                        markerCandidates.remove(toRemove);
                 }
             }
         }

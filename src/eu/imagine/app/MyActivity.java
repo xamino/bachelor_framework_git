@@ -18,53 +18,83 @@ public class MyActivity extends Activity {
      * Example object to render. Format is 3 coords followed by 4 colors.
      */
     private float[] oneData = new float[]{
-            -0.5f, -0.5f, 0.0f,
-            1.0f, 0.0f, 0.0f, 1.0f,
+            0, 0, 0,
+            1.0f, 0.0f, 0.0f, 1.0f, // red
 
-            0.5f, -0.5f, 0.0f,
-            0.0f, 0.0f, 1.0f, 1.0f,
+            -0.5f, 0.5f, 0,
+            0.0f, 1.0f, 0.0f, 1.0f,  // green
 
-            0.5f, 0.5f, 0.0f,
-            0.0f, 1.0f, 0.0f, 1.0f
+            0.5f, 0.5f, 0,
+            0.0f, 0.0f, 1.0f, 1.0f, // blue
+
+            0, 0, 0,
+            1.0f, 0.0f, 0.0f, 0.5f, // red
+
+            -0.5f, -0.5f, 0,
+            0.0f, 1.0f, 0.0f, 0.5f,  // green
+
+            0.5f, -0.5f, 0,
+            0.0f, 0.0f, 1.0f, 0.5f // blue
     };
 
-    // Camera matrix (here determined ahead of time)
+    private float[] twoData = new float[]{
+            0, 0, 0,
+            1.0f, 0.0f, 0.0f, 1.0f, // red
+
+            -0.5f, 0.5f, 0,
+            0.0f, 0.0f, 1.0f, 0.8f,  // blue
+
+            0.5f, 0.5f, 0,
+            0.0f, 0.0f, 1.0f, 0.8f // blue
+    };
+
+    /*
+    Orig:
     private float[][] cameraMatrix = new float[][]{
             new float[]{1279.170989993096f, 0f, 639.5f},
             new float[]{0f, 1279.170989993096f, 359.5f},
             new float[]{0f, 0f, 1f}
     };
-    // Distortion coefficients:
     private float[] distortionCoefficients = new float[]{
             0.3226026655144f, -2.722492888428328f, 0f, 0f, 5.676717782925402f
+    };
+     */
+
+    // Camera matrix (here determined ahead of time)
+    private float[][] cameraMatrix = new float[][]{
+            new float[]{1280, 0, 640},
+            new float[]{0, 1280, 360},
+            new float[]{0, 0, 1}
+    };
+    // Distortion coefficients:
+    private float[] distortionCoefficients = new float[]{
+            0.3f, -2.7f, 0f, 0f, 5.7f
     };
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.imagine);
         // Construct framework. This includes passing a reference to the
         // activity (here this), the viewgroup where it'll construct its
         // views, and the camera and distortioncoefficients.
-        framework = new MainInterface(this, (ViewGroup) findViewById(R.id
-                .group), cameraMatrix, distortionCoefficients);
+        framework = new MainInterface(this, cameraMatrix, distortionCoefficients);
         // Set some debugging flags:
         // framework.allowUncertainHamming();
-        // framework.setFlag(Flags.DEBUG_LOGGING);
-        framework.setFlag(Flags.DEBUG_FRAME);
-        framework.setFlag(Flags.USE_CANNY);
-        // framework.setFlag(Flags.DEBUG_PREP_FRAME);
-        // framework.setFlag(Flags.DEBUG_CONTOURS);
-        // framework.setFlag(Flags.DEBUG_POLY);
-        framework.setFlag(Flags.DEBUG_DRAW_MARKERS);
-        framework.setFlag(Flags.DEBUG_DRAW_MARKER_ID);
-        framework.setFlag(Flags.DEBUG_DRAW_SAMPLING);
+        framework.setFlag(Flags.ALLOW_DUPLICATE_MARKERS, true);
+        // framework.setFlag(Flags.DEBUG_LOGGING, true);
+        // framework.setFlag(Flags.DEBUG_FRAME, true);
+        // framework.setFlag(Flags.DEBUG_POLY, true);
+        // framework.setFlag(Flags.DEBUG_DRAW_MARKERS);
+        // framework.setFlag(Flags.DEBUG_DRAW_MARKER_ID);
+        // framework.setFlag(Flags.DEBUG_DRAW_SAMPLING);
         // Add some test entities:
-        // Tracking one = new Tracking(242, true, oneData);
-        // Tracking two = new Tracking(9, true, oneData);
-        // framework.registerEntity(one);
-        // framework.registerEntity(two);
+        Tracking one = new Tracking(42, true, oneData);
+        Tracking two = new Tracking(234, true, twoData);
+        framework.registerEntity(one);
+        framework.registerEntity(two);
         // Call on create:
-        framework.onCreate();
+        framework.onCreate((ViewGroup) findViewById(R.id
+                .group));
     }
 
     public void onResume() {

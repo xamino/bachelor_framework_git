@@ -298,7 +298,8 @@ class Detector {
      */
     private boolean markersClose(Marker one, Marker two) {
         if (one.getID() == two.getID()) {
-            if (one.getArea() - two.getArea() < 20 || one.getArea() - two.getArea
+            if (one.getArea() - two.getArea() < 20 && one.getArea() - two
+                    .getArea
                     () > -20) {
                 log.debug(TAG, "Removing double marker! ID: " + one.getID());
                 return true;

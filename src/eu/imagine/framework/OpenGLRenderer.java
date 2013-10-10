@@ -81,7 +81,9 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
             if (toRender == null) {
                 log.log(TAG, "Error getting list!");
                 toRender = new ArrayList<Trackable>();
-            }
+            } else
+                log.debug(TAG, "Updated list – found " + this.toRender.size() + " " +
+                        "trackables.");
         }
         // ------------------------ RENDER ------------------------
         if (!toRender.isEmpty()) {
@@ -153,7 +155,9 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+        // The (1+data.capacity() / 8) tells us how many vertices we need to
+        // draw
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, (1 + data.capacity() / 8));
     }
 
     private void createShaders() {

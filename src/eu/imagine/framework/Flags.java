@@ -20,6 +20,10 @@ public enum Flags {
      */
     ONLY_HOMOGRAPHY,
     /**
+     * Allow duplicate markers to be detected and rendered.
+     */
+    ALLOW_DUPLICATE_MARKERS,
+    /**
      * Enables linear pipeline for detection, allowing debug views to be
      * drawn to output. NOTE: This is REQUIRED for all debug flags that
      * affect the drawing of a single output frame! (DEBUG_PREP_FRAME,

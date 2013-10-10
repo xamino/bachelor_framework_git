@@ -3,7 +3,21 @@
           package="eu.imagine"
           android:versionCode="1"
           android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="16"/>
+
+    <uses-sdk android:targetSdkVersion="16"
+            android:minSdkVersion="16"/>
+
+    <uses-feature android:name="android.hardware.camera"
+                  android:required="true"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"
+                  android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.front"
+                  android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.front.autofocus"
+                  android:required="false"/>
+    <uses-feature android:glEsVersion="0x00020000"
+                  android:required="true"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
     <application
             android:label="@string/app_name"
             android:hardwareAccelerated="true"
@@ -16,16 +30,5 @@
             </intent-filter>
         </activity>
     </application>
-    <uses-permission android:name="android.permission.CAMERA"/>
 
-    <uses-feature android:name="android.hardware.camera"
-                  android:required="true"/>
-    <uses-feature android:name="android.hardware.camera.autofocus"
-                  android:required="false"/>
-    <uses-feature android:name="android.hardware.camera.front"
-                  android:required="false"/>
-    <uses-feature android:name="android.hardware.camera.front.autofocus"
-                  android:required="false"/>
-    <uses-feature android:glEsVersion="0x00020000"
-                  android:required="true"/>
 </manifest>
