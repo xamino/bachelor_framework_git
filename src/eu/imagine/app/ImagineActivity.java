@@ -51,12 +51,12 @@ public class ImagineActivity extends Activity {
     /*
     Orig:
     private float[][] cameraMatrix = new float[][]{
-            new float[]{1279.170989993096f, 0f, 639.5f},
-            new float[]{0f, 1279.170989993096f, 359.5f},
+            new float[]{1251f, 0f, 639.5f},
+            new float[]{0f, 1251f, 359.5f},
             new float[]{0f, 0f, 1f}
     };
     private float[] distortionCoefficients = new float[]{
-            0.3226026655144f, -2.722492888428328f, 0f, 0f, 5.676717782925402f
+            0.2610701252267455f, -2.229801972443634f, 0f, 0f, 4.354745457073879f
     };
      */
 
@@ -68,7 +68,7 @@ public class ImagineActivity extends Activity {
     };
     // Distortion coefficients:
     private float[] distortionCoefficients = new float[]{
-            0.3f, -2.7f, 0f, 0f, 5.7f
+            0.2785042226314545f, -2.410807609558105f, 0, 0, 4.748225688934326f
     };
 
     public void onCreate(Bundle savedInstanceState) {

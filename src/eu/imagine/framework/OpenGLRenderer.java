@@ -109,15 +109,18 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         float c_x = mainInterface.camMatrix[0][2];
         float c_y = mainInterface.camMatrix[1][2];
 
-        float fovY = 1f / (f_x / height * 2f);
-        float aspectRatio = width / height * f_y / f_x;
-        float near = 0.1f;  // Near clipping distance (0.1)
-        float far = 1000f;  // Far clipping distance  (1000)
+        float aspectRatio = ((float)width / (float)height) * (f_y / f_x);
+        // Last number was originally 2f, but is better with 2.xf
+        float fovY = 1f / (f_x / (float)height * 2.6f);
+        float near = 0.1f;
+        float far = 1000f;
         float frustum_height = near * fovY;
         float frustum_width = frustum_height * aspectRatio;
 
-        float offset_x = (width / 2f - c_x) / width * frustum_width * 2f;
-        float offset_y = (height / 2f - c_y) / height * frustum_height * 2f;
+        float offset_x = (((float)width / 2f) - c_x) / (float)width *
+                frustum_width * 2f;
+        float offset_y = (((float)height / 2f) - c_y) / (float)height *
+                frustum_height * 2f;
 
         Matrix.frustumM(mProjectionMatrix, 0, -frustum_width - offset_x, frustum_width - offset_x,
                 -frustum_height - offset_y, frustum_height - offset_y, near, far);
