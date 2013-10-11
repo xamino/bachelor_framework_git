@@ -18,7 +18,8 @@ public class StartActivity extends Activity implements View.OnClickListener, Com
 
     private Button b_start;
     private Switch b_debugLog, b_debugFrameLog, b_dupMarkers, b_frameDebug,
-            b_prepFrame;
+            b_prepFrame, b_contours, b_squares, b_markers, b_sampling,
+            b_markerID;
     private RadioGroup r_binMethod;
 
     private Bundle options;
@@ -51,6 +52,21 @@ public class StartActivity extends Activity implements View.OnClickListener, Com
         b_prepFrame = (Switch) findViewById(R.id.prepFrame);
         b_prepFrame.setOnCheckedChangeListener(this);
         b_prepFrame.setEnabled(false);
+        b_contours = (Switch) findViewById(R.id.contours);
+        b_contours.setOnCheckedChangeListener(this);
+        b_contours.setEnabled(false);
+        b_squares = (Switch) findViewById(R.id.square);
+        b_squares.setOnCheckedChangeListener(this);
+        b_squares.setEnabled(false);
+        b_markers = (Switch) findViewById(R.id.markers);
+        b_markers.setOnCheckedChangeListener(this);
+        b_markers.setEnabled(false);
+        b_sampling = (Switch) findViewById(R.id.sampling);
+        b_sampling.setOnCheckedChangeListener(this);
+        b_sampling.setEnabled(false);
+        b_markerID = (Switch) findViewById(R.id.marker_id);
+        b_markerID.setOnCheckedChangeListener(this);
+        b_markerID.setEnabled(false);
     }
 
     @Override
@@ -83,9 +99,29 @@ public class StartActivity extends Activity implements View.OnClickListener, Com
             case R.id.visualDebug:
                 options.putBoolean("debugFrame", isChecked);
                 b_prepFrame.setEnabled(isChecked);
+                b_contours.setEnabled(isChecked);
+                b_squares.setEnabled(isChecked);
+                b_markers.setEnabled(isChecked);
+                b_sampling.setEnabled(isChecked);
+                b_markerID.setEnabled(isChecked);
                 break;
             case R.id.prepFrame:
                 options.putBoolean("prepFrame", isChecked);
+                break;
+            case R.id.contours:
+                options.putBoolean("contours", isChecked);
+                break;
+            case R.id.square:
+                options.putBoolean("poly", isChecked);
+                break;
+            case R.id.markers:
+                options.putBoolean("marker", isChecked);
+                break;
+            case R.id.sampling:
+                options.putBoolean("sample", isChecked);
+                break;
+            case R.id.marker_id:
+                options.putBoolean("marker_id", isChecked);
                 break;
             default:
                 Log.e(TAG, "Unknown compoundbutton clicked!");

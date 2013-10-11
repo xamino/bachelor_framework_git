@@ -93,6 +93,18 @@ public class ImagineActivity extends Activity {
                             false));
             framework.setFlag(Flags.DEBUG_PREP_FRAME,
                     options.getBoolean("prepFrame", false));
+            framework.setFlag(Flags.DEBUG_CONTOURS,
+                    options.getBoolean("contours", false));
+            framework.setFlag(Flags.DEBUG_POLY,
+                    options.getBoolean("poly", false));
+
+            framework.setFlag(Flags.DEBUG_DRAW_MARKERS,
+                    options.getBoolean("marker", false));
+            framework.setFlag(Flags.DEBUG_DRAW_SAMPLING,
+                    options.getBoolean("sample", false));
+            framework.setFlag(Flags.DEBUG_DRAW_MARKER_ID,
+                    options.getBoolean("marker_id", false));
+
             switch (options.getInt("bin", 0)) {
                 case 0:
                     // default is normal threshold
