@@ -24,6 +24,8 @@
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         <activity android:name=".app.MyActivity"
                   android:label="@string/app_name">
+        </activity>
+        <activity android:name=".app.StartActivity" android:label="start">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

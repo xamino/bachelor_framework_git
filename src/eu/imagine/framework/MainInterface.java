@@ -79,7 +79,7 @@ public class MainInterface {
         // Create OpenGL render part:
         if (RUN_RENDERER) {
             render = new RenderInterface(this);
-            GLSurfaceView renderView = new GLSurfaceView(this.mainActivity);
+            GLSurfaceView renderView = new GLSurfaceView(mainActivity.getApplicationContext());
             renderView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup
                     .LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             groupView.addView(renderView);
