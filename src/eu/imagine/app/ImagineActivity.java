@@ -91,8 +91,10 @@ public class ImagineActivity extends Activity {
         }
 
         // Add some test entities:
+        // TODO: Allow dynamic marker selection for rendering object in
+        // startactivity
         float[] color = new float[]{0.5f, 0.5f, 0.5f, 0.9f};
-        float[] conv = framework.importOBJ(house, null, 0.25f);
+        float[] conv = framework.importOBJ(house, null, 0.5f);
 
         Tracking one = new Tracking(42, true, conv);
         framework.registerEntity(one);

@@ -75,9 +75,9 @@ class Detector {
                 new Point(MARKER_SIZE, 0), new Point(MARKER_SIZE, MARKER_SIZE));
         // Prepare standard 3d object points:
         this.objectPoints = new MatOfPoint3f();
-        this.objectPoints.fromArray(new Point3(0.5f, -0.5f, 0f),
-                new Point3(-0.5f, -0.5f, 0f), new Point3(-0.5f, 0.5f, 0f),
-                new Point3(0.5f, 0.5f, 0f));
+        this.objectPoints.fromArray(new Point3(1f, -1f, 0f),
+                new Point3(-1f, -1f, 0f), new Point3(-1f, 1f, 0f),
+                new Point3(1f, 1f, 0f));
         // Set calibration things:
         ConvertHelper CONVERT = ConvertHelper.getInstance();
         this.camMatrix = CONVERT.float2ToMatFloat(mainInterface.camMatrix);

@@ -111,17 +111,17 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         float c_x = mainInterface.camMatrix[0][2];
         float c_y = mainInterface.camMatrix[1][2];
 
-        float aspectRatio = ((float)width / (float)height) * (f_y / f_x);
+        float aspectRatio = ((float) width / (float) height) * (f_y / f_x);
         // Last number was originally 2f, but is better with 2.xf
-        float fovY = 1f / (f_x / (float)height * 2.6f);
+        float fovY = 1f / (f_x / (float) height * 2.6f);
         float near = 0.1f;
         float far = 1000f;
         float frustum_height = near * fovY;
         float frustum_width = frustum_height * aspectRatio;
 
-        float offset_x = (((float)width / 2f) - c_x) / (float)width *
+        float offset_x = (((float) width / 2f) - c_x) / (float) width *
                 frustum_width * 2f;
-        float offset_y = (((float)height / 2f) - c_y) / (float)height *
+        float offset_y = (((float) height / 2f) - c_y) / (float) height *
                 frustum_height * 2f;
 
         Matrix.frustumM(mProjectionMatrix, 0, -frustum_width - offset_x, frustum_width - offset_x,
@@ -133,8 +133,6 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
      *
      * @param data The vertice data containing coordinates and colors to draw.
      */
-    // TODO: Make data always define object one triangle at a time (so always
-    // three sets of vertices define one tri)
     private void drawObject(final FloatBuffer data) {
 
         // Pass in the position information
