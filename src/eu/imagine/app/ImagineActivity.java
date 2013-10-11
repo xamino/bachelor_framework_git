@@ -14,40 +14,6 @@ public class ImagineActivity extends Activity {
      */
     private MainInterface framework;
 
-    /**
-     * Example object to render. Format is 3 coords followed by 4 colors.
-     */
-    private float[] oneData = new float[]{
-            0, 0, 0,
-            1.0f, 0.0f, 0.0f, 1.0f, // red
-
-            -0.5f, 0.5f, 0,
-            0.0f, 1.0f, 0.0f, 1.0f,  // green
-
-            0.5f, 0.5f, 0,
-            0.0f, 0.0f, 1.0f, 1.0f, // blue
-
-            0, 0, 0,
-            1.0f, 0.0f, 0.0f, 0.5f, // red
-
-            -0.5f, -0.5f, 0,
-            0.0f, 1.0f, 0.0f, 0.5f,  // green
-
-            0.5f, -0.5f, 0,
-            0.0f, 0.0f, 1.0f, 0.5f // blue
-    };
-
-    private float[] twoData = new float[]{
-            0, 0, 0,
-            1.0f, 0.0f, 0.0f, 1.0f, // red
-
-            -0.5f, 0.5f, 0,
-            0.0f, 0.0f, 1.0f, 0.8f,  // blue
-
-            0.5f, 0.5f, 0,
-            0.0f, 0.0f, 1.0f, 0.8f // blue
-    };
-
     /*
     Orig:
     private float[][] cameraMatrix = new float[][]{
@@ -125,10 +91,7 @@ public class ImagineActivity extends Activity {
         }
 
         // Add some test entities:
-        Tracking one = new Tracking(42, true, oneData);
-        Tracking two = new Tracking(234, true, twoData);
-        framework.registerEntity(one);
-        framework.registerEntity(two);
+        // TODO
 
         // Call on create:
         framework.onCreate((ViewGroup) findViewById(R.id
