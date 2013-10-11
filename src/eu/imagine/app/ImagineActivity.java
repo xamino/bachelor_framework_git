@@ -91,7 +91,11 @@ public class ImagineActivity extends Activity {
         }
 
         // Add some test entities:
-        // TODO
+        float[] color = new float[]{0.5f, 0.5f, 0.5f, 0.9f};
+        float[] conv = framework.importOBJ(house, null, 0.25f);
+
+        Tracking one = new Tracking(42, true, conv);
+        framework.registerEntity(one);
 
         // Call on create:
         framework.onCreate((ViewGroup) findViewById(R.id
@@ -115,4 +119,37 @@ public class ImagineActivity extends Activity {
         // Call on destroy:
         framework.onDestroy();
     }
+
+    String house = "# Blender v2.68 (sub 0) OBJ File: ''\n" +
+            "# www.blender.org\n" +
+            "mtllib untitled.mtl\n" +
+            "o Cube\n" +
+            "v 1.000000 -1.000000 -1.000000\n" +
+            "v 1.000000 -1.000000 1.000000\n" +
+            "v -1.000000 -1.000000 1.000000\n" +
+            "v -1.000000 -1.000000 -1.000000\n" +
+            "v 1.000000 1.000000 -0.999999\n" +
+            "v 0.999999 1.000000 1.000001\n" +
+            "v -1.000000 1.000000 1.000000\n" +
+            "v -1.000000 1.000000 -1.000000\n" +
+            "v 1.000000 2.000000 0.000001\n" +
+            "v -1.000000 2.000000 -0.000000\n" +
+            "usemtl Material\n" +
+            "s off\n" +
+            "f 1 2 3\n" +
+            "f 9 10 7\n" +
+            "f 1 5 2\n" +
+            "f 2 6 3\n" +
+            "f 7 10 8\n" +
+            "f 5 1 8\n" +
+            "f 5 8 10\n" +
+            "f 4 1 3\n" +
+            "f 6 9 7\n" +
+            "f 5 9 6\n" +
+            "f 2 5 6\n" +
+            "f 1 4 8\n" +
+            "f 3 7 8\n" +
+            "f 4 3 8\n" +
+            "f 9 5 10\n" +
+            "f 6 7 3";
 }

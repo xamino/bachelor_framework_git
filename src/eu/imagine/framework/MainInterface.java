@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 import org.opencv.android.JavaCameraView;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created with IntelliJ IDEA.
@@ -174,6 +175,81 @@ public class MainInterface {
     @SuppressWarnings("UnusedDeclaration")
     public void removeEntity(Entity entity) {
         this.allTrackables.remove(entity);
+    }
+
+    /**
+     * Function to create the marker for a given ID.
+     *
+     * @param ID The ID to encode into the marker.
+     * @return The complete pattern that resembles the marker,
+     *         including coded ID, coded direction, and borders.
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public boolean[][] getMarker(int ID) {
+        return MarkerPatternHelper.createMarker(ID);
+    }
+
+    /**
+     * Helper method for converting an .obj file to the correct float value.
+     *
+     * @param data  The string containing the obj file.
+     * @param color The color to show. If null, each face will be colored
+     *              randomly.
+     * @param scale Value to scale object by.
+     * @return The complete float representation of the object,
+     *         ready to be converted to the FloatBuffer required.
+     */
+    public float[] importOBJ(String data, float[] color, float scale) {
+        Random rand = new Random();
+        boolean randColors = color == null;
+        String[] lines = data.split("\n");
+        ArrayList<float[]> vertices = new ArrayList<float[]>();
+        ArrayList<int[]> faces = new ArrayList<int[]>();
+        // Extract vertice and face info:
+        for (String line : lines) {
+            // If starts with v --> vertice
+            if (line.charAt(0) == 'v') {
+                // Split for spaces
+                String[] floats = line.substring(1).trim().split(" ");
+                float[] vert = new float[3];
+                // get three coordinates
+                for (int i = 0; i < vert.length; i++)
+                    vert[i] = Float.valueOf(floats[i].trim());
+                // save
+                vertices.add(vert);
+            } else if (line.charAt(0) == 'f') {
+                String[] ints = line.substring(1).trim().split(" ");
+                int[] face = new int[3];
+                for (int i = 0; i < face.length; i++)
+                    face[i] = Integer.valueOf(ints[i].trim());
+                faces.add(face);
+            }
+        }
+        // Set together float:
+        float[] retData = new float[faces.size() * 21];
+        // For each face
+        for (int i = 0; i < faces.size(); i++) {
+            // Put each vertice
+            int[] face = faces.get(i);
+            // Check color:
+            if (randColors)
+                color = new float[]{rand.nextFloat(), rand.nextFloat(),
+                        rand.nextFloat(), 1f};
+            for (int j = 0; j < face.length; j++) {
+                float[] vertice = vertices.get(face[j] - 1);
+                // apply scale
+                retData[i * 21 + j * 7 + 0] = vertice[0] * scale;
+                retData[i * 21 + j * 7 + 1] = vertice[1] * scale;
+                retData[i * 21 + j * 7 + 2] = vertice[2] * scale;
+                // write color data
+                retData[i * 21 + j * 7 + 3] = color[0];
+                retData[i * 21 + j * 7 + 4] = color[1];
+                retData[i * 21 + j * 7 + 5] = color[2];
+                retData[i * 21 + j * 7 + 6] = color[3];
+            }
+        }
+
+        return retData;
     }
 
     /**
