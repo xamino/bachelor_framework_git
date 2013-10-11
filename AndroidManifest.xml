@@ -22,7 +22,7 @@
             android:label="@string/app_name"
             android:hardwareAccelerated="true"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-        <activity android:name=".app.MyActivity"
+        <activity android:name=".app.ImagineActivity"
                   android:label="@string/app_name">
         </activity>
         <activity android:name=".app.StartActivity" android:label="start">

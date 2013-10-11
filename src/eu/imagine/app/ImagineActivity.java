@@ -7,7 +7,7 @@ import eu.imagine.R;
 import eu.imagine.framework.Flags;
 import eu.imagine.framework.MainInterface;
 
-public class MyActivity extends Activity {
+public class ImagineActivity extends Activity {
 
     /**
      * Stores instance of framework for access.
@@ -74,24 +74,28 @@ public class MyActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.imagine);
+
         // Construct framework. This includes passing a reference to the
         // activity (here this), the viewgroup where it'll construct its
         // views, and the camera and distortioncoefficients.
         framework = new MainInterface(this, cameraMatrix, distortionCoefficients);
-        // Set some debugging flags:
-        // framework.allowUncertainHamming();
-        framework.setFlag(Flags.ALLOW_DUPLICATE_MARKERS, true);
-        // framework.setFlag(Flags.DEBUG_LOGGING, true);
-        // framework.setFlag(Flags.DEBUG_FRAME, true);
-        // framework.setFlag(Flags.DEBUG_POLY, true);
-        // framework.setFlag(Flags.DEBUG_DRAW_MARKERS);
-        // framework.setFlag(Flags.DEBUG_DRAW_MARKER_ID);
-        // framework.setFlag(Flags.DEBUG_DRAW_SAMPLING);
+
+        // Get and parse options to set
+        Bundle options = getIntent().getExtras();
+        if (options != null) {
+            framework.setFlag(Flags.DEBUG_LOGGING, options.getBoolean("debugLog", false));
+            framework.setFlag(Flags.ALLOW_DUPLICATE_MARKERS,
+                    options.getBoolean("dupMarkers", false));
+            framework.setFlag(Flags.DEBUG_FRAME_LOGGING,
+                    options.getBoolean("frameDebug", false));
+        }
+
         // Add some test entities:
         Tracking one = new Tracking(42, true, oneData);
         Tracking two = new Tracking(234, true, twoData);
         framework.registerEntity(one);
         framework.registerEntity(two);
+
         // Call on create:
         framework.onCreate((ViewGroup) findViewById(R.id
                 .group));
