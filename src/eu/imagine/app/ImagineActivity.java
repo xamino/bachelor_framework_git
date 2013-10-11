@@ -88,6 +88,28 @@ public class ImagineActivity extends Activity {
                     options.getBoolean("dupMarkers", false));
             framework.setFlag(Flags.DEBUG_FRAME_LOGGING,
                     options.getBoolean("frameDebug", false));
+            framework.setFlag(Flags.DEBUG_FRAME,
+                    options.getBoolean("debugFrame",
+                            false));
+            framework.setFlag(Flags.DEBUG_PREP_FRAME,
+                    options.getBoolean("prepFrame", false));
+            switch (options.getInt("bin", 0)) {
+                case 0:
+                    // default is normal threshold
+                    framework.setFlag(Flags.USE_CANNY, false);
+                    framework.setFlag(Flags.USE_ADAPTIVE, false);
+                    break;
+                case 1:
+                    framework.setFlag(Flags.USE_ADAPTIVE, true);
+                    framework.setFlag(Flags.USE_CANNY, false);
+                    break;
+                case 2:
+                    framework.setFlag(Flags.USE_CANNY, true);
+                    framework.setFlag(Flags.USE_ADAPTIVE, false);
+                    break;
+                default:
+                    // do nothing
+            }
         }
 
         // Add some test entities:
