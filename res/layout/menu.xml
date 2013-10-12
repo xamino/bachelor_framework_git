@@ -12,8 +12,9 @@
             android:layout_height="wrap_content"
             android:text="Start Imagine"
             android:id="@+id/start"
-            android:layout_gravity="left|center_vertical"
-            android:layout_row="0" android:layout_column="0"/>
+            android:layout_gravity="left"
+            android:layout_row="0"
+            android:layout_column="0"/>
     <Switch
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -27,7 +28,8 @@
             android:text="Frame Debug Logging"
             android:id="@+id/frameDebug"
             android:layout_row="1"
-            android:layout_column="1"/>
+            android:layout_column="1"
+            android:paddingLeft="20pt"/>
     <Switch
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -42,31 +44,40 @@
             android:id="@+id/hamming"
             android:layout_row="3"
             android:layout_column="0"/>
-    <RadioGroup
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:id="@+id/r_group"
-            android:layout_row="4"
-            android:layout_column="0">
-        <RadioButton android:id="@+id/r_default"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:text="Simple Threshold"/>
-        <RadioButton android:id="@+id/r_adaptive"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:text="Adaptive Threshold"/>
-        <RadioButton android:id="@+id/r_canny"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:text="Canny Edge Detection"/>
-    </RadioGroup>
+    <LinearLayout android:orientation="vertical"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_row="4"
+                  android:layout_column="0">
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:text="Binarization Method:"
+                  android:textSize="8pt"/>
+        <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:id="@+id/r_group">
+            <RadioButton android:id="@+id/r_default"
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:text="Simple Threshold"/>
+            <RadioButton android:id="@+id/r_adaptive"
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:text="Adaptive Threshold"/>
+            <RadioButton android:id="@+id/r_canny"
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:text="Canny Edge Detection"/>
+        </RadioGroup>
+    </LinearLayout>
     <LinearLayout android:orientation="horizontal"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_row="4"
-                  android:layout_column="1">
+                  android:layout_column="1"
+                  android:paddingLeft="20pt">
         <EditText android:id="@+id/theshold"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
@@ -76,7 +87,7 @@
                 android:layout_height="wrap_content"
                 android:text="Apply"
                 android:id="@+id/apply"
-                android:layout_gravity="right|center_vertical"/>
+                android:layout_gravity="right"/>
     </LinearLayout>
     <Switch
             android:layout_width="wrap_content"
@@ -91,40 +102,46 @@
             android:text="Show Binary Output"
             android:id="@+id/prepFrame"
             android:layout_row="5"
-            android:layout_column="1"/>
+            android:layout_column="1"
+            android:paddingLeft="20pt"/>
     <Switch
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Show Contours"
             android:id="@+id/contours"
             android:layout_row="6"
-            android:layout_column="1"/>
+            android:layout_column="1"
+            android:paddingLeft="20pt"/>
     <Switch
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Show Detected Squares"
             android:id="@+id/square"
             android:layout_row="7"
-            android:layout_column="1"/>
+            android:layout_column="1"
+            android:paddingLeft="20pt"/>
     <Switch
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Show Detected Markers"
             android:id="@+id/markers"
             android:layout_row="8"
-            android:layout_column="1"/>
+            android:layout_column="1"
+            android:paddingLeft="20pt"/>
     <Switch
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Show Marker Sampling"
             android:id="@+id/sampling"
             android:layout_row="9"
-            android:layout_column="1"/>
+            android:layout_column="1"
+            android:paddingLeft="20pt"/>
     <Switch
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Show Marker Binary"
             android:id="@+id/marker_id"
             android:layout_row="10"
-            android:layout_column="1"/>
+            android:layout_column="1"
+            android:paddingLeft="20pt"/>
 </GridLayout>
