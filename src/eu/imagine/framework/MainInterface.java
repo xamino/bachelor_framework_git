@@ -122,16 +122,12 @@ public class MainInterface {
      */
     @SuppressWarnings("UnusedDeclaration")
     public void setBinaryThreshold(int value) {
-        this.threshold = value;
-    }
-
-    /**
-     * Call this method to allow markers to be detected where the Hamming
-     * encoding is uncertain. Normally, these are discarded.
-     */
-    @SuppressWarnings("UnusedDeclaration")
-    public void allowUncertainHamming() {
-        MarkerPatternHelper.hammingDeforce = true;
+        if (value >= 0 && value <= 255) {
+            log.debug(TAG, "Setting theshold to "+value);
+            this.threshold = value;
+        }
+        else
+            this.threshold = 100;
     }
 
     /**
@@ -263,6 +259,9 @@ public class MainInterface {
         switch (value) {
             case ALLOW_DUPLICATE_MARKERS:
                 this.ALLOW_DUPLICATE_MARKERS = bool;
+                break;
+            case ALLOW_UNCERTAIN_HAMMING:
+                MarkerPatternHelper.hammingDeforce = bool;
                 break;
             case ONLY_HOMOGRAPHY:
                 this.RUN_RENDERER = !bool;

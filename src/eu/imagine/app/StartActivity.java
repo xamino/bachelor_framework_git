@@ -8,21 +8,26 @@ import android.view.View;
 import android.widget.*;
 import eu.imagine.R;
 
+import java.util.ArrayList;
+
 /**
  * Created with IntelliJ IDEA.
  * User: tamino
  * Date: 10/11/13
  * Time: 1:35 PM
  */
-public class StartActivity extends Activity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener {
+public class StartActivity extends Activity implements View.OnClickListener,
+        CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener {
 
-    private Button b_start;
+    private Button b_start, b_apply;
     private Switch b_debugLog, b_debugFrameLog, b_dupMarkers, b_frameDebug,
             b_prepFrame, b_contours, b_squares, b_markers, b_sampling,
-            b_markerID;
+            b_markerID, b_uncertain;
     private RadioGroup r_binMethod;
+    private EditText threshold;
 
     private Bundle options;
+    private ArrayList<Integer> trackers;
     private final String TAG = "StartActivity";
 
     public void onCreate(Bundle savedInstanceState) {
@@ -30,13 +35,18 @@ public class StartActivity extends Activity implements View.OnClickListener, Com
         setContentView(R.layout.menu);
 
         options = new Bundle();
+        trackers = new ArrayList<Integer>();
 
         b_start = (Button) findViewById(R.id.start);
         b_start.setOnClickListener(this);
+        b_apply = (Button) findViewById(R.id.apply);
+        b_apply.setOnClickListener(this);
 
         r_binMethod = (RadioGroup) findViewById(R.id.r_group);
         r_binMethod.setOnCheckedChangeListener(this);
         ((RadioButton) findViewById(R.id.r_default)).setChecked(true);
+
+        threshold = (EditText) findViewById(R.id.theshold);
 
         b_debugLog = (Switch) findViewById(R.id.debugLog);
         b_debugLog.setOnCheckedChangeListener(this);
@@ -46,6 +56,8 @@ public class StartActivity extends Activity implements View.OnClickListener, Com
 
         b_dupMarkers = (Switch) findViewById(R.id.dupMarkers);
         b_dupMarkers.setOnCheckedChangeListener(this);
+        b_uncertain = (Switch) findViewById(R.id.hamming);
+        b_uncertain.setOnCheckedChangeListener(this);
 
         b_frameDebug = (Switch) findViewById(R.id.visualDebug);
         b_frameDebug.setOnCheckedChangeListener(this);
@@ -78,6 +90,13 @@ public class StartActivity extends Activity implements View.OnClickListener, Com
                 in.putExtras(options);
                 startActivity(in);
                 break;
+            case R.id.apply:
+                String thesh = threshold.getText().toString();
+                if (!thesh.isEmpty())
+                    options.putInt("threshold", Integer.valueOf(thesh));
+                else
+                    options.putInt("threshold", 100);
+                break;
             default:
                 Log.e(TAG, "Unknown button clicked!");
         }
@@ -95,6 +114,9 @@ public class StartActivity extends Activity implements View.OnClickListener, Com
                 break;
             case R.id.dupMarkers:
                 options.putBoolean("dupMarkers", isChecked);
+                break;
+            case R.id.hamming:
+                options.putBoolean("hamming", isChecked);
                 break;
             case R.id.visualDebug:
                 options.putBoolean("debugFrame", isChecked);

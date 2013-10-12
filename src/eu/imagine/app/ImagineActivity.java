@@ -49,11 +49,19 @@ public class ImagineActivity extends Activity {
         // Get and parse options to set
         Bundle options = getIntent().getExtras();
         if (options != null) {
-            framework.setFlag(Flags.DEBUG_LOGGING, options.getBoolean("debugLog", false));
-            framework.setFlag(Flags.ALLOW_DUPLICATE_MARKERS,
-                    options.getBoolean("dupMarkers", false));
+            // Logging options
+            framework.setFlag(Flags.DEBUG_LOGGING,
+                    options.getBoolean("debugLog", false));
             framework.setFlag(Flags.DEBUG_FRAME_LOGGING,
                     options.getBoolean("frameDebug", false));
+
+            // Detection settings
+            framework.setFlag(Flags.ALLOW_DUPLICATE_MARKERS,
+                    options.getBoolean("dupMarkers", false));
+            framework.setFlag(Flags.ALLOW_UNCERTAIN_HAMMING,
+                    options.getBoolean("hamming", false));
+
+            // Visual debugging
             framework.setFlag(Flags.DEBUG_FRAME,
                     options.getBoolean("debugFrame",
                             false));
@@ -71,6 +79,9 @@ public class ImagineActivity extends Activity {
             framework.setFlag(Flags.DEBUG_DRAW_MARKER_ID,
                     options.getBoolean("marker_id", false));
 
+            // Threshold:
+            framework.setBinaryThreshold(options.getInt("threshold", 100));
+            // Method switch
             switch (options.getInt("bin", 0)) {
                 case 0:
                     // default is normal threshold
@@ -93,7 +104,6 @@ public class ImagineActivity extends Activity {
         // Add some test entities:
         // TODO: Allow dynamic marker selection for rendering object in
         // startactivity
-        float[] color = new float[]{0.5f, 0.5f, 0.5f, 0.9f};
         float[] conv = framework.importOBJ(house, null, 0.5f);
 
         Tracking one = new Tracking(42, true, conv);

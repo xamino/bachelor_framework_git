@@ -24,6 +24,11 @@ public enum Flags {
      */
     ALLOW_DUPLICATE_MARKERS,
     /**
+     * Allow markers to be detected where the Hamming
+     * encoding is uncertain. Normally, these are discarded.
+     */
+    ALLOW_UNCERTAIN_HAMMING,
+    /**
      * Enables linear pipeline for detection, allowing debug views to be
      * drawn to output. NOTE: This is REQUIRED for all debug flags that
      * affect the drawing of a single output frame! (DEBUG_PREP_FRAME,
