@@ -12,10 +12,8 @@ import org.opencv.core.Mat;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Created with IntelliJ IDEA.
- * User: tamino
- * Date: 9/15/13
- * Time: 2:05 PM
+ * This is the interface which handles the management of the OpenCV
+ * connection to the library on Android and the OpenCVWorkers.
  */
 class OpenCVInterface implements CameraBridgeViewBase
         .CvCameraViewListener2 {
@@ -30,6 +28,7 @@ class OpenCVInterface implements CameraBridgeViewBase
     protected LinkedBlockingQueue<TransportContainer> workerFeeder;
     private Detector det;
     private OpenCVWorker[] workers;
+    @SuppressWarnings("FieldCanBeLocal")
     private final int PARALLEL_COUNT = 4;
 
     private BaseLoaderCallback mLoaderCallback;
@@ -53,6 +52,12 @@ class OpenCVInterface implements CameraBridgeViewBase
         };
     }
 
+    /**
+     * Starts the camera view. Notably also creates the worker threads.
+     *
+     * @param width  -  the width of the frames that will be delivered
+     * @param height - the height of the frames that will be delivered
+     */
     @Override
     public void onCameraViewStarted(int width, int height) {
         det = new Detector(mainInterface);
@@ -61,24 +66,21 @@ class OpenCVInterface implements CameraBridgeViewBase
         workers = new OpenCVWorker[PARALLEL_COUNT];
 
         for (int i = 0; i < workers.length; i++) {
-            workers[i] = new OpenCVWorker(this, mainInterface,
-                    "OpenCV Worker " + i);
+            workers[i] = new OpenCVWorker(this, mainInterface);
             workers[i].start();
         }
     }
 
     @Override
     public void onCameraViewStopped() {
-        for (int i = 0; i < workers.length; i++) {
-            workers[i].interrupt();
-        }
+        for (OpenCVWorker worker : workers) worker.interrupt();
     }
 
     /**
      * This is where the frame is processed by OpenCV.
      *
-     * @param inputFrame
-     * @return
+     * @param inputFrame The frame containing the rgba and gray mat.
+     * @return The frame to show.
      */
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
@@ -122,6 +124,11 @@ class OpenCVInterface implements CameraBridgeViewBase
             mOpenCvCameraView.disableView();
     }
 
+    /**
+     * Method for getting one TransportContainer to work on for the threads.
+     *
+     * @return The container with the mat data.
+     */
     protected TransportContainer getTransport() {
         try {
             return workerFeeder.take();

@@ -10,11 +10,9 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 /**
- * Created with IntelliJ IDEA.
- * User: tamino
- * Date: 9/15/13
- * Time: 3:25 PM
+ * Handles the rendering of the objects.
  */
+@SuppressWarnings("FieldCanBeLocal")
 class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     private final MainInterface mainInterface;
@@ -39,12 +37,23 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
     private final int mBytesPerFloat = 4;
     private final int mStrideBytes = 7 * mBytesPerFloat;
 
+    /**
+     * Constructor.
+     *
+     * @param mainInterface Pointer to MainInterface.
+     */
     protected OpenGLRenderer(MainInterface mainInterface) {
         this.log = Messenger.getInstance();
         this.mainInterface = mainInterface;
         this.toRender = new ArrayList<Trackable>();
     }
 
+    /**
+     * Called when a surface is created.
+     *
+     * @param gl     The unused context.
+     * @param config Unused configuration options.
+     */
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         GLES20.glClearColor(0.1f, 0f, 0f, 0.1f);
@@ -69,6 +78,12 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         createShaders();
     }
 
+    /**
+     * Rendering of a single frame. Here we update and render the detected
+     * trackable list.
+     *
+     * @param gl Unused context.
+     */
     @Override
     public void onDrawFrame(GL10 gl) {
         if (MainInterface.DEBUG_FRAME_LOGGING)
@@ -102,6 +117,15 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    /**
+     * Called whenever the draw surface is changed – most notably on creation
+     * . Notably takes care of setting up the correct perspective
+     * transformation based on the camera calibration values.
+     *
+     * @param gl     Unused context.
+     * @param width  Width in pixel of canvas.
+     * @param height Height in pixel of canvas.
+     */
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
@@ -129,7 +153,9 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
     }
 
     /**
-     * Method for painting any given object.
+     * Method for painting any given object. Data must be 7 floats per face –
+     * we render one triangle consisting of 3 vertices with each vertice
+     * having an rgba color float value.
      *
      * @param data The vertice data containing coordinates and colors to draw.
      */
@@ -163,6 +189,9 @@ class OpenGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, (1 + data.capacity() / 8));
     }
 
+    /**
+     * Method for creating the most basic of shaders.
+     */
     private void createShaders() {
         final String vertexShader =
                 "uniform mat4 u_MVPMatrix;      \n"

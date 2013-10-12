@@ -5,11 +5,6 @@ import android.util.Log;
 import java.util.*;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Tamino Hartmann
- * Date: 9/15/13
- * Time: 1:09 PM
- * <p/>
  * This class implements a thread safe timer for multiple objects and
  * standardized logging functions for the framework.
  */
@@ -136,6 +131,7 @@ class Messenger {
      * Method for registering a listener for log and debug messages.
      * @param object The object to register.
      */
+    @SuppressWarnings("UnusedDeclaration")
     public void registerListener(MessageInterface object) {
         listeners.add(object);
     }
@@ -144,6 +140,7 @@ class Messenger {
      * Method for removing a listener for log and debug messages.
      * @param object The object to remove.
      */
+    @SuppressWarnings("UnusedDeclaration")
     public void removeListener(MessageInterface object) {
         listeners.remove(object);
     }

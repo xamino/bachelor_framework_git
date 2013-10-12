@@ -4,11 +4,9 @@ import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 
 /**
- * Created with IntelliJ IDEA.
- * User: tamino
- * Date: 9/15/13
- * Time: 3:05 PM
+ * Simple interface for handling the OpenGL surface and renderer.
  */
+@SuppressWarnings("FieldCanBeLocal")
 class RenderInterface {
 
     private final MainInterface mainInterface;
@@ -21,6 +19,12 @@ class RenderInterface {
         this.mainInterface = mainInterface;
     }
 
+    /**
+     * Method for creating the surface where the OpenGL drawing will happen.
+     * Notably we set the transparent options here.
+     *
+     * @param renderView The view to use.
+     */
     protected void onCreate(GLSurfaceView renderView) {
         mGLView = renderView;
         mGLView.setEGLContextClientVersion(2);

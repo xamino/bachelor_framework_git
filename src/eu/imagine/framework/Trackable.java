@@ -9,7 +9,7 @@ class Trackable {
 
     private FloatBuffer FLOATBUFFER;
     private int ID;
-    private float[] TRANSLATION, INVERSE;
+    private float[] TRANSLATION;
 
     Trackable(final int ID,
                      float[] translation, final FloatBuffer FLOATBUFFER) {
@@ -28,13 +28,5 @@ class Trackable {
 
     float[] getTRANSLATION() {
         return this.TRANSLATION;
-    }
-
-    float[] getINVERSE() {
-        return INVERSE;
-    }
-
-    void setInverse(float[] inverse) {
-        this.INVERSE = inverse;
     }
 }

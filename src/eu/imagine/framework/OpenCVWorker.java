@@ -1,28 +1,21 @@
 package eu.imagine.framework;
 
 /**
- * Created with IntelliJ IDEA.
- * User: tamino
- * Date: 9/2/13
- * Time: 2:09 PM
+ * A single thread for detecting markers.
  */
+@SuppressWarnings("FieldCanBeLocal")
 class OpenCVWorker extends Thread {
 
-    private final String TAG;
     private TransportContainer in;
     private OpenCVInterface cvInterface;
     private Detector det;
-    private Messenger log;
 
     protected OpenCVWorker(OpenCVInterface cvInterface,
-                           MainInterface mainInterface,
-                           String tag) {
+                           MainInterface mainInterface) {
         super();
         super.setPriority(Thread.MAX_PRIORITY);
-        this.TAG = tag;
         this.det = new Detector(mainInterface);
         this.cvInterface = cvInterface;
-        log = Messenger.getInstance();
     }
 
     @Override
@@ -31,6 +24,7 @@ class OpenCVWorker extends Thread {
             in = cvInterface.getTransport();
             if (in == null)
                 continue;
+            // Call detect in Detector
             det.detect(in.gray, in.rgba);
         }
     }

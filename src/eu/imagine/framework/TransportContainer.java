@@ -3,10 +3,8 @@ package eu.imagine.framework;
 import org.opencv.core.Mat;
 
 /**
- * Created with IntelliJ IDEA.
- * User: tamino
- * Date: 9/9/13
- * Time: 4:37 PM
+ * Simple data class for passing both the rgba and gray mat to the worker
+ * threads.
  */
 class TransportContainer {
 
