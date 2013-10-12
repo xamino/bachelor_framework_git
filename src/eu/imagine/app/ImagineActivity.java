@@ -7,6 +7,8 @@ import eu.imagine.R;
 import eu.imagine.framework.Flags;
 import eu.imagine.framework.MainInterface;
 
+import java.util.ArrayList;
+
 public class ImagineActivity extends Activity {
 
     /**
@@ -45,6 +47,9 @@ public class ImagineActivity extends Activity {
         // activity (here this), the viewgroup where it'll construct its
         // views, and the camera and distortioncoefficients.
         framework = new MainInterface(this, cameraMatrix, distortionCoefficients);
+
+        // Import model
+        float[] conv = framework.importOBJ(house, null, 0.5f);
 
         // Get and parse options to set
         Bundle options = getIntent().getExtras();
@@ -99,15 +104,12 @@ public class ImagineActivity extends Activity {
                 default:
                     // do nothing
             }
+
+            // register all trackables:
+            ArrayList<Integer> tra = options.getIntegerArrayList("trackers");
+            for (int value : tra)
+                framework.registerEntity(new Tracking(value, true, conv));
         }
-
-        // Add some test entities:
-        // TODO: Allow dynamic marker selection for rendering object in
-        // startactivity
-        float[] conv = framework.importOBJ(house, null, 0.5f);
-
-        Tracking one = new Tracking(42, true, conv);
-        framework.registerEntity(one);
 
         // Call on create:
         framework.onCreate((ViewGroup) findViewById(R.id

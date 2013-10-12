@@ -19,12 +19,12 @@ import java.util.ArrayList;
 public class StartActivity extends Activity implements View.OnClickListener,
         CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener {
 
-    private Button b_start, b_apply;
+    private Button b_start, b_apply, b_add, b_remove;
     private Switch b_debugLog, b_debugFrameLog, b_dupMarkers, b_frameDebug,
             b_prepFrame, b_contours, b_squares, b_markers, b_sampling,
             b_markerID, b_uncertain;
     private RadioGroup r_binMethod;
-    private EditText threshold;
+    private EditText threshold, trackMarker;
 
     private Bundle options;
     private ArrayList<Integer> trackers;
@@ -41,12 +41,17 @@ public class StartActivity extends Activity implements View.OnClickListener,
         b_start.setOnClickListener(this);
         b_apply = (Button) findViewById(R.id.apply);
         b_apply.setOnClickListener(this);
+        b_add = (Button) findViewById(R.id.add);
+        b_add.setOnClickListener(this);
+        b_remove = (Button) findViewById(R.id.remove);
+        b_remove.setOnClickListener(this);
 
         r_binMethod = (RadioGroup) findViewById(R.id.r_group);
         r_binMethod.setOnCheckedChangeListener(this);
         ((RadioButton) findViewById(R.id.r_default)).setChecked(true);
 
         threshold = (EditText) findViewById(R.id.theshold);
+        trackMarker = (EditText) findViewById(R.id.trackMarker);
 
         b_debugLog = (Switch) findViewById(R.id.debugLog);
         b_debugLog.setOnCheckedChangeListener(this);
@@ -87,6 +92,8 @@ public class StartActivity extends Activity implements View.OnClickListener,
             case R.id.start:
                 Intent in = new Intent();
                 in.setClass(getApplicationContext(), ImagineActivity.class);
+                // Add all trackers:
+                options.putIntegerArrayList("trackers", trackers);
                 in.putExtras(options);
                 startActivity(in);
                 break;
@@ -96,6 +103,16 @@ public class StartActivity extends Activity implements View.OnClickListener,
                     options.putInt("threshold", Integer.valueOf(thesh));
                 else
                     options.putInt("threshold", 100);
+                break;
+            case R.id.add:
+                String add = trackMarker.getText().toString();
+                if (!add.isEmpty())
+                    trackers.add(Integer.valueOf(add));
+                break;
+            case R.id.remove:
+                String remove = trackMarker.getText().toString();
+                if (!remove.isEmpty())
+                    trackers.remove(Integer.valueOf(remove));
                 break;
             default:
                 Log.e(TAG, "Unknown button clicked!");
