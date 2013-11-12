@@ -300,7 +300,7 @@ class Detector {
         if (one.getID() == two.getID()) {
             if (one.getArea() - two.getArea() < 20 && one.getArea() - two
                     .getArea
-                    () > -20) {
+                            () > -20) {
                 log.debug(TAG, "Removing double marker! ID: " + one.getID());
                 return true;
             }
@@ -336,9 +336,11 @@ class Detector {
         }
 
         // we'll allow 4 incorrect border pieces but no more
-        if (errorAllowance > 4 && !DEBUG_DRAW_MARKER_ID && !DEBUG_DRAW_MARKERS) {
+        if (errorAllowance > 4) {
             log.debug(TAG, "Discarding over incomplete border detection!");
-            return null;
+            // Return null if we're not debugging – we're done in that case.
+            if (!DEBUG_DRAW_MARKER_ID && !DEBUG_DRAW_MARKERS)
+                return null;
         }
         // Now read pattern:
         // time: ~3ms
