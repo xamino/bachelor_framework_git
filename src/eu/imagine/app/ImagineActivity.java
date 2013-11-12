@@ -16,28 +16,29 @@ public class ImagineActivity extends Activity {
      */
     private MainInterface framework;
 
-    /*
-    Orig:
-    private float[][] cameraMatrix = new float[][]{
-            new float[]{1251f, 0f, 639.5f},
-            new float[]{0f, 1251f, 359.5f},
-            new float[]{0f, 0f, 1f}
-    };
-    private float[] distortionCoefficients = new float[]{
-            0.2610701252267455f, -2.229801972443634f, 0f, 0f, 4.354745457073879f
-    };
-     */
-
+    // Transformer Prime:
     // Camera matrix (here determined ahead of time)
-    private float[][] cameraMatrix = new float[][]{
+    private float[][] cM_prime = new float[][]{
             new float[]{1280, 0, 640},
             new float[]{0, 1280, 360},
             new float[]{0, 0, 1}
     };
     // Distortion coefficients:
-    private float[] distortionCoefficients = new float[]{
+    private float[] dC_prime = new float[]{
             0.2785042226314545f, -2.410807609558105f, 0, 0, 4.748225688934326f
     };
+
+    // Nexus 5:
+    private float[][] cM_nexus = new float[][]{
+            new float[]{1160.523878387543f, 0, 639.5f},
+            new float[]{0, 1160.523878387543f, 479.5f},
+            new float[]{0, 0, 1}
+    };
+    private float[] dC_nexus = new float[]{
+            0.1247707476524136f, -0.1943220542784276f, 0, 0,
+            0.02545414714626192f
+    };
+
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +47,7 @@ public class ImagineActivity extends Activity {
         // Construct framework. This includes passing a reference to the
         // activity (here this), the viewgroup where it'll construct its
         // views, and the camera and distortioncoefficients.
-        framework = new MainInterface(this, cameraMatrix, distortionCoefficients);
+        framework = new MainInterface(this, cM_nexus, dC_nexus);
 
         // Import model
         float[] conv = framework.importOBJ(house, null, 0.75f);
