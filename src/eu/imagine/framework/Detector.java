@@ -211,7 +211,7 @@ class Detector {
                     (float) rotMat.get(2, 1)[0], 0.0f,
                     (float) rotMat.get(0, 2)[0], (float) rotMat.get(1, 2)[0],
                     (float) rotMat.get(2, 2)[0], 0.0f,
-                    (float) Tvec.get(0, 0)[0], -(float) Tvec.get(1, 0)[0],
+                    (float) Tvec.get(0, 0)[0] + 0.2f, -(float) Tvec.get(1, 0)[0],
                     -(float) Tvec.get(2, 0)[0], 1.0f
             };
 
@@ -339,8 +339,9 @@ class Detector {
         if (errorAllowance > 4) {
             log.debug(TAG, "Discarding over incomplete border detection!");
             // Return null if we're not debugging – we're done in that case.
-            if (!DEBUG_DRAW_MARKER_ID && !DEBUG_DRAW_MARKERS)
+            if (!(DEBUG_DRAW_MARKER_ID || DEBUG_DRAW_MARKERS)) {
                 return null;
+            }
         }
         // Now read pattern:
         // time: ~3ms
@@ -358,7 +359,7 @@ class Detector {
             angle = -90;
             pattern = rotatePattern(3, pattern);
         } else if (pattern[0][0] && !pattern[0][3] &&
-                pattern[0][3] && pattern[3][3]) {
+                pattern[3][0] && pattern[3][3]) {
             angle = 0;
         } else if (pattern[0][0] && pattern[0][3] &&
                 !pattern[3][0] && pattern[3][3]) {
@@ -373,8 +374,9 @@ class Detector {
             // orientation information.
             log.debug(TAG, "Discarding over missing orientation information!");
             angle = -1;
-            if (!DEBUG_DRAW_MARKER_ID && !DEBUG_DRAW_MARKERS)
+            if (!(DEBUG_DRAW_MARKER_ID || DEBUG_DRAW_MARKERS)) {
                 return null;
+            }
         }
 
         // Get Hamming code corrected id:

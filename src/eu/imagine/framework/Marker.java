@@ -98,4 +98,8 @@ public class Marker {
     public int getArea() {
         return this.area;
     }
+
+    public int getAngle() {
+        return angle;
+    }
 }
